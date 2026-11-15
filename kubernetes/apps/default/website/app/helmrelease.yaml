@@ -111,7 +111,6 @@ spec:
           gethomepage.dev/pod-selector: app.kubernetes.io/name=website
         hostnames:
           - jeffriffle.com
-          - www.jeffriffle.com # Cloudflare redirects www to the apex
         parentRefs:
           - name: envoy-external
             namespace: network
@@ -120,6 +119,20 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+      # www.jeffriffle.com -> https://jeffriffle.com (same path)
+      www:
+        hostnames:
+          - www.jeffriffle.com
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  hostname: jeffriffle.com
+                  statusCode: 301
     persistence:
       git:
         type: emptyDir

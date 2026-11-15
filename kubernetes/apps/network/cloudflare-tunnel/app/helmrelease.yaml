@@ -65,6 +65,12 @@ spec:
         data:
           config.yaml: |-
             ingress:
+              # The wildcard does not match the apex, so jeffriffle.com needs its own rule
+              - hostname: jeffriffle.com
+                originRequest:
+                  http2Origin: true
+                  originServerName: external.jeffriffle.com
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
               - hostname: "*.jeffriffle.com"
                 originRequest:
                   http2Origin: true
