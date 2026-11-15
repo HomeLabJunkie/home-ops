@@ -13,12 +13,13 @@ _[Talos Linux](https://www.talos.dev) on six mini PCs, deployed by [Flux](https:
 </div>
 
 > [!NOTE]
-> **Rebuild in progress.** This repository replaces an earlier setup that was managed through a
-> hosted control plane. Sections marked _(planned)_ describe what is being built and are not live
-> yet. The status line below is updated as each stage lands.
+> **Rebuilt in November 2026.** This repository replaces an earlier setup that was managed through
+> a hosted control plane. The cluster was wiped and rebuilt from this repository, its backups were
+> proven by deleting and restoring data, and the self-hosted apps below moved in from a single
+> server.
 >
 > **Stage:** repository skeleton and tooling ✅ · Talos configs ✅ · bootstrap and core apps ✅ ·
-> cluster rebuild ✅ · backups proven ⏳ · apps migrated ⏳
+> cluster rebuild ✅ · backups proven ✅ · apps migrated ✅ · public ⏳
 
 ## Overview
 
@@ -71,6 +72,24 @@ KVM for console access.
 | Observability    | [Prometheus](https://prometheus.io), [Grafana](https://grafana.com), [VictoriaLogs](https://docs.victoriametrics.com/victorialogs), [Vector](https://vector.dev) |
 | Status badges    | [kromgo](https://github.com/home-operations/kromgo): the live badges at the top of this page                                                                     |
 
+## Applications
+
+Each application lives in `kubernetes/apps/<namespace>/<app>/`.
+
+| Namespace          | Apps                                                                                                                                                                                                                                                                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default`          | [Homepage](kubernetes/apps/default/homepage) (dashboard), [Trilium](kubernetes/apps/default/trilium) (notes), [Vaultwarden](kubernetes/apps/default/vaultwarden) (passwords), [website](kubernetes/apps/default/website) (jeffriffle.com), [fb-search](kubernetes/apps/default/fb-search)                                          |
+| `headlamp`         | [Headlamp](kubernetes/apps/headlamp/headlamp) (Kubernetes web UI)                                                                                                                                                                                                                                                                  |
+| `observability`    | [kube-prometheus-stack](kubernetes/apps/observability/kube-prometheus-stack), [Grafana](kubernetes/apps/observability/grafana-operator), [VictoriaLogs](kubernetes/apps/observability/victoria-logs), [Vector](kubernetes/apps/observability/vector), [kromgo](kubernetes/apps/observability/kromgo)                               |
+| `network`          | [Envoy Gateway](kubernetes/apps/network/envoy-gateway), [cloudflared](kubernetes/apps/network/cloudflare-tunnel), [external-dns](kubernetes/apps/network/cloudflare-dns), [k8s-gateway](kubernetes/apps/network/k8s-gateway)                                                                                                       |
+| `longhorn-system`  | [Longhorn](kubernetes/apps/longhorn-system/longhorn)                                                                                                                                                                                                                                                                               |
+| `kopiur-system`    | [Kopiur](kubernetes/apps/kopiur-system/kopiur)                                                                                                                                                                                                                                                                                     |
+| `system-upgrade`   | [tuppr](kubernetes/apps/system-upgrade/tuppr)                                                                                                                                                                                                                                                                                      |
+| `external-secrets` | [External Secrets](kubernetes/apps/external-secrets/external-secrets) with the [Bitwarden store](kubernetes/apps/external-secrets/bitwarden)                                                                                                                                                                                       |
+| `cert-manager`     | [cert-manager](kubernetes/apps/cert-manager/cert-manager)                                                                                                                                                                                                                                                                          |
+| `flux-system`      | [Flux Operator](kubernetes/apps/flux-system/flux-operator), [Flux instance](kubernetes/apps/flux-system/flux-instance)                                                                                                                                                                                                             |
+| `kube-system`      | [Cilium](kubernetes/apps/kube-system/cilium), [CoreDNS](kubernetes/apps/kube-system/coredns), [metrics-server](kubernetes/apps/kube-system/metrics-server), [Reloader](kubernetes/apps/kube-system/reloader), [snapshot-controller](kubernetes/apps/kube-system/snapshot-controller), [Spegel](kubernetes/apps/kube-system/spegel) |
+
 ## How a change reaches the cluster
 
 ```mermaid
@@ -113,12 +132,22 @@ Nothing secret is stored in this repository, encrypted or otherwise.
 - **In CI and before every commit**, [gitleaks](https://github.com/gitleaks/gitleaks) scans for
   anything that looks like a credential.
 
-## Backups _(planned)_
+## Backups
 
-Application data is backed up by Kopiur to S3 storage on the Unraid server, and the whole backup
-repository is replicated nightly to a NAS. Each application's volume is declared with a restore
-as its data source, so on a rebuilt cluster the application comes back with its data without any
-manual steps.
+Two independent tools write to two different machines, so a bug in one tool or the loss of one
+machine cannot take out every copy.
+
+| What                               | Tool                                                                            | Where                            | When                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------- |
+| App data, file level               | [Kopiur](https://github.com/home-operations/kopiur) ([Kopia](https://kopia.io)) | S3 (Garage) on the Unraid server | hourly; 24 hourly, 7 daily, 4 weekly kept |
+| Copy of the whole Kopia repository | Kopiur `RepositoryReplication`                                                  | NAS over NFS                     | nightly                                   |
+| Volumes, block level               | Longhorn backups                                                                | NAS over NFS                     | nightly, 14 kept                          |
+
+Each application's volume is declared with a Kopiur restore as its data source
+([`components/kopiur`](kubernetes/components/kopiur)), so on a rebuilt cluster the application comes
+back with its data without any manual steps; a brand-new app simply starts empty. All three paths
+were tested by writing known data, deleting the volume and restoring it: the restored files were
+identical.
 
 ## Tooling
 
