@@ -27,3 +27,6 @@ spec:
     - pvc:
         name: ${APP}
   volumeSnapshotClassName: ${KOPIUR_SNAPSHOTCLASS:=longhorn-snapshot}
+  # The volume restored from that snapshot for the backup: one replica, short-lived
+  staging:
+    storageClassName: ${KOPIUR_STAGINGCLASS:=longhorn-staging}

@@ -6,6 +6,7 @@ components:
 resources:
   - ./helmrepository.yaml
   - ./storageclass-nobackup.yaml
+  - ./storageclass-staging.yaml
   - ./volumesnapshotclass.yaml
   - ./networkpolicy-metrics.yaml
   - ./helmrelease.yaml
