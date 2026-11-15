@@ -1,0 +1,20 @@
+# Secrets: nothing secret belongs in this repo, encrypted or not
+*.crt
+*.env
+*.key
+*.pem
+*.pub
+# Talos and Kubernetes client configs
+kubeconfig
+talosconfig
+# Images
+*.iso
+# Python
+__pycache__/
+*.py[cod]
+# Misc.
+.claude/
+.private/
+.venv/
+.DS_Store
+Thumbs.db
