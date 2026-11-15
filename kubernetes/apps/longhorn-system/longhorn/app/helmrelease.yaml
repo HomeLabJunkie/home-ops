@@ -28,7 +28,9 @@ spec:
     # Block-level volume backups go to the NAS over NFS. They are the second,
     # independent backup path next to Kopiur (file-level, to S3).
     defaultBackupStore:
-      backupTarget: nfs://192.168.1.8:/mnt/HD/HD_a2/k8s-backup/longhorn
+      # The WD NAS only speaks NFSv3 (Longhorn tries 4.x by default); Talos has
+      # no NFSv3 lock daemon, so nolock.
+      backupTarget: nfs://192.168.1.8:/mnt/HD/HD_a2/k8s-backup/longhorn?nfsOptions=nfsvers=3,nolock,soft,timeo=300,retrans=3
     metrics:
       serviceMonitor:
         enabled: true
