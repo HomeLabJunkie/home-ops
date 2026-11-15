@@ -1,0 +1,23 @@
+---
+# Every request to trilium.jeffriffle.com is checked by Authelia first
+# (Authelia rule: group admins, two_factor), then Trilium asks for its own
+# password. Sync between Trilium instances uses the LAN service instead.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: trilium-authelia
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: trilium
+  extAuth:
+    failOpen: false
+    headersToExtAuth: [accept, cookie, proxy-authorization, x-forwarded-proto]
+    http:
+      backendRefs:
+        - name: authelia
+          port: 9091
+      path: /api/authz/ext-authz/
+      headersToBackend: [remote-user, remote-groups, remote-name, remote-email]
