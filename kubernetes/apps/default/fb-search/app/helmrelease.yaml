@@ -39,7 +39,9 @@ spec:
               - --ssh-known-hosts-file=/etc/git-known-hosts/known_hosts
               - --git-config=safe.directory:/src
               - --one-time
-            securityContext: &securityContext
+            securityContext:
+              runAsUser: 65533 # git-sync's own user: ssh needs a passwd entry
+              runAsGroup: 65533
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
@@ -56,7 +58,10 @@ spec:
               - --requirement=/src/current/requirements.txt
             env:
               HOME: /tmp
-            securityContext: *securityContext
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image: *playwright
