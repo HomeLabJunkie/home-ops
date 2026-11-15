@@ -18,7 +18,7 @@ _[Talos Linux](https://www.talos.dev) on six mini PCs, deployed by [Flux](https:
 > yet. The status line below is updated as each stage lands.
 >
 > **Stage:** repository skeleton and tooling ✅ · Talos configs ✅ · bootstrap and core apps ✅ ·
-> cluster rebuild ⏳ · backups proven ⏳ · apps migrated ⏳
+> cluster rebuild ✅ · backups proven ⏳ · apps migrated ⏳
 
 ## Overview
 
