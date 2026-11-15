@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-secrets
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: external-secrets
+  interval: 1h
+  values:
+    leaderElect: true
+    serviceMonitor:
+      enabled: true
+    webhook:
+      replicaCount: 2
+    # The Bitwarden Secrets Manager provider talks to this small HTTPS service,
+    # which wraps the Bitwarden SDK. Its certificate is in certificate.yaml.
+    bitwarden-sdk-server:
+      enabled: true

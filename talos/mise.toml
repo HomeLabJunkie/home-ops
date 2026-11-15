@@ -152,7 +152,7 @@ tmp="$(mktemp -d -p /dev/shm)"
 trap 'rm -rf "$tmp"' EXIT
 talosctl gen secrets -o "$tmp/bundle.yaml" >/dev/null
 while read -r name path; do
-    bws secret create "$name" "$(yq -er "$path" "$tmp/bundle.yaml")" "$project_id" -o none
+    bws secret create -o none -- "$name" "$(yq -er "$path" "$tmp/bundle.yaml")" "$project_id" >/dev/null 2>&1
     mise run //:log info "Stored" name "$name"
 done <<'MAP'
 MACHINE_TOKEN .trustdinfo.token

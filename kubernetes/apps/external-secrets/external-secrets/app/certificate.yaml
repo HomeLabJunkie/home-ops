@@ -1,0 +1,59 @@
+---
+# The Bitwarden SDK server only serves HTTPS. This is a private certificate
+# authority for it: a self-signed issuer mints a CA, and that CA signs the
+# server certificate. The secret store trusts the CA (see ../../bitwarden).
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cert-manager.io/issuer_v1.json
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: bitwarden-selfsigned
+spec:
+  selfSigned: {}
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bitwarden-ca
+spec:
+  commonName: bitwarden-sdk-server-ca
+  duration: 87600h # 10 years
+  isCA: true
+  issuerRef:
+    kind: Issuer
+    name: bitwarden-selfsigned
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  secretName: bitwarden-ca
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cert-manager.io/issuer_v1.json
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: bitwarden-ca
+spec:
+  ca:
+    secretName: bitwarden-ca
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bitwarden-tls-certs
+spec:
+  dnsNames:
+    - bitwarden-sdk-server.external-secrets.svc.cluster.local
+    - bitwarden-sdk-server.external-secrets.svc
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+    - ::1
+  issuerRef:
+    kind: Issuer
+    name: bitwarden-ca
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048
+  secretName: bitwarden-tls-certs # the name the SDK server chart mounts
