@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: longhorn
+      version: 1.13.0
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    # Data lives on the SATA SSD in every node: the Talos user volume
+    # "longhorn", mounted at /var/mnt/longhorn (see talos/cluster.yaml.j2)
+    defaultSettings:
+      defaultDataPath: /var/mnt/longhorn
+      storageReservedPercentageForDefaultDisk: 10
+    # Block-level volume backups go to the NAS over NFS. They are the second,
+    # independent backup path next to Kopiur (file-level, to S3).
+    defaultBackupStore:
+      backupTarget: nfs://192.168.1.8:/mnt/HD/HD_a2/k8s-backup/longhorn
+    metrics:
+      serviceMonitor:
+        enabled: true
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 3

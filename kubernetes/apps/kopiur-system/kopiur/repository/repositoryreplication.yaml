@@ -1,0 +1,30 @@
+---
+# The second copy: every night the whole repository is mirrored to the NAS
+# over NFS (`kopia repository sync-to`). Blobs are copied as they are, so the
+# mirror uses the same password and can be opened directly if Garage is lost.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/repositoryreplication_v1alpha1.json
+apiVersion: kopiur.home-operations.com/v1alpha1
+kind: RepositoryReplication
+metadata:
+  name: garage-to-nas
+spec:
+  sourceRef:
+    kind: ClusterRepository
+    name: garage
+  destination:
+    filesystem:
+      path: /repo
+      volume:
+        nfs:
+          server: 192.168.1.8
+          path: /mnt/HD/HD_a2/k8s-backup/kopiur
+  mover:
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+  schedule:
+    cron: 0 4 * * * # after the 03:00 full maintenance
+    jitter: 30m
+  sync:
+    deleteExtra: true # keep the mirror an exact copy, so it does not grow forever
+    parallel: 8

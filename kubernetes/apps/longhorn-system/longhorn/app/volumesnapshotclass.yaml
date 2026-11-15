@@ -1,0 +1,12 @@
+---
+# Lets CSI consumers (Kopiur) take a crash-consistent Longhorn snapshot of a
+# volume and back up from that instead of from the live filesystem.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/snapshot.storage.k8s.io/volumesnapshotclass_v1.json
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: longhorn-snapshot
+driver: driver.longhorn.io
+deletionPolicy: Delete
+parameters:
+  type: snap # a Longhorn snapshot inside the volume, not a backup to the backup target

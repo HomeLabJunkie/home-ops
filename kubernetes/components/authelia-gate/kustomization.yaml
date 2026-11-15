@@ -1,0 +1,8 @@
+---
+# Puts an app's HTTPRoute behind Authelia (https://auth.jeffriffle.com, running
+# on unraid). Include this component in an app's kustomization and add a
+# SecurityPolicy (see securitypolicy.yaml in headlamp/longhorn) for its route.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./service.yaml

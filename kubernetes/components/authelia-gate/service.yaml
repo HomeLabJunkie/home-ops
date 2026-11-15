@@ -1,0 +1,27 @@
+---
+# Authelia's ext-authz endpoint, reached on unraid's LAN address through the
+# small "authelia-lan" forwarder (192.168.1.9:9091 -> authelia:9091). A Service
+# without a selector plus a hand-written EndpointSlice points Envoy at it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: authelia
+spec:
+  ports:
+    - name: http
+      port: 9091
+      protocol: TCP
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: authelia-unraid
+  labels:
+    kubernetes.io/service-name: authelia
+addressType: IPv4
+ports:
+  - name: http
+    port: 9091
+    protocol: TCP
+endpoints:
+  - addresses: ["192.168.1.9"]
