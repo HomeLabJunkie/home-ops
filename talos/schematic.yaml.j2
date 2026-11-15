@@ -1,5 +1,7 @@
 ---
 customization:
+  extraKernelArgs:
+    - sysctl.kernel.kexec_load_disabled=1 # amdgpu hangs on kexec reboots (also set in cluster.yaml.j2)
   systemExtensions:
     officialExtensions:
       - siderolabs/amd-ucode # AMD CPU microcode
