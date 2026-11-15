@@ -92,6 +92,9 @@ apiVersion: v1alpha1
 kind: SysctlConfig
 params:
   fs.inotify.max_user_instances: "8192"
+  # Reboot through the firmware, never kexec: kexec with the amdgpu driver
+  # loaded leaves the Ryzen APU's GPU hung and the node dead until power-cycled
+  kernel.kexec_load_disabled: "1"
   fs.inotify.max_user_watches: "1048576"
   net.core.default_qdisc: fq
   net.core.rmem_max: "67108864"

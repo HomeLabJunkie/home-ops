@@ -89,6 +89,9 @@ whose hardware diverges from the fleet. No overrides exist today.
   why `workers.yaml.j2` carries `crt` only.
 - The network link alias `net0` selects the node's single Realtek NIC by driver. A node with a
   second Realtek NIC would need its own selector.
+- kexec is disabled (`kernel.kexec_load_disabled`): with the amdgpu driver loaded, a kexec reboot
+  hangs these Ryzen APUs with no video until they are power-cycled. Reboots go through the firmware
+  instead. The amdgpu extension itself stays, because without it the display goes dark after boot.
 - A fresh install wipes the NVMe but never the SATA data disk. Wipe that disk before reinstalling
   a node whose Longhorn data should not survive.
 

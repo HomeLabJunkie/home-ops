@@ -2,15 +2,12 @@
 # Fails a PR when Homepage's generated config (services.yaml, settings.yaml)
 # is out of date with kubernetes/apps/default/homepage/inventory.yaml.
 # Fix: python3 scripts/homepage.py, then commit the result.
+# Runs on every PR (no path filter) because it is a required check.
 name: Homepage config
 
 on:
   pull_request:
     branches: [main]
-    paths:
-      - kubernetes/apps/default/homepage/**
-      - scripts/homepage.py
-      - .github/workflows/homepage-config.yaml
 
 permissions: {}
 
