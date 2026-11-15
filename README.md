@@ -17,7 +17,7 @@ _[Talos Linux](https://www.talos.dev) on six mini PCs, deployed by [Flux](https:
 > hosted control plane. Sections marked _(planned)_ describe what is being built and are not live
 > yet. The status line below is updated as each stage lands.
 >
-> **Stage:** repository skeleton and tooling ✅ · Talos configs ✅ · bootstrap and core apps ⏳ ·
+> **Stage:** repository skeleton and tooling ✅ · Talos configs ✅ · bootstrap and core apps ✅ ·
 > cluster rebuild ⏳ · backups proven ⏳ · apps migrated ⏳
 
 ## Overview
@@ -55,7 +55,7 @@ Supporting machines outside the cluster: an Unraid server (S3 object storage, si
 other self-hosted apps), a NAS (backup target), an OPNsense router (DNS, DHCP) and a Raspberry Pi
 KVM for console access.
 
-## Components _(planned)_
+## Components
 
 | Area             | Tool                                                                                                                                                             |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |

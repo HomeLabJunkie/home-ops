@@ -1,0 +1,6 @@
+---
+# Discover the cluster's own apps from gethomepage.dev/* annotations on
+# their HTTPRoutes (Gateway API); the pod's ServiceAccount reads them.
+mode: cluster
+gateway: true
+ingress: false

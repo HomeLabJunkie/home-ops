@@ -1,0 +1,115 @@
+---
+# Homepage (https://homepage.jeffriffle.com), behind Authelia. No database:
+# the config is the homepage-config ConfigMap built from ./config in git.
+# /app/config is read-only here, so EVERY file in the image's skeleton
+# (/app/src/skeleton) must be mounted: a missing one makes Homepage try to
+# copy it in and exit (2.8 added proxmox.yaml). Check after upgrades:
+#   kubectl -n default exec deploy/homepage -- ls /app/src/skeleton
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homepage
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: homepage
+  interval: 1h
+  values:
+    controllers:
+      homepage:
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: homepage
+        containers:
+          app:
+            image:
+              repository: ghcr.io/gethomepage/homepage
+              tag: v2.8.0
+            # A list, not a map: MY_POD_IP must come before the variable that
+            # uses it. The pod IP entry is for the kubelet's probes.
+            env:
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              - name: HOMEPAGE_ALLOWED_HOSTS
+                value: homepage.jeffriffle.com,$(MY_POD_IP):3000
+              - name: LOG_TARGETS
+                value: stdout
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/healthcheck
+                    port: &port 3000
+                  periodSeconds: 15
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 20m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+    serviceAccount:
+      homepage: {}
+    rbac:
+      roles:
+        homepage:
+          type: ClusterRole
+          rules:
+            - apiGroups: [""]
+              resources: ["namespaces", "pods", "nodes"]
+              verbs: ["get", "list"]
+            - apiGroups: ["gateway.networking.k8s.io"]
+              resources: ["httproutes", "gateways"]
+              verbs: ["get", "list"]
+            - apiGroups: ["metrics.k8s.io"]
+              resources: ["nodes", "pods"]
+              verbs: ["get", "list"]
+      bindings:
+        homepage:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: homepage
+          subjects:
+            - identifier: homepage
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    persistence:
+      config:
+        type: configMap
+        name: homepage-config
+        advancedMounts:
+          homepage:
+            app:
+              - { path: /app/config/services.yaml, subPath: services.yaml }
+              - { path: /app/config/settings.yaml, subPath: settings.yaml }
+              - { path: /app/config/widgets.yaml, subPath: widgets.yaml }
+              - { path: /app/config/kubernetes.yaml, subPath: kubernetes.yaml }
+              - { path: /app/config/bookmarks.yaml, subPath: bookmarks.yaml }
+              - { path: /app/config/docker.yaml, subPath: docker.yaml }
+              - { path: /app/config/proxmox.yaml, subPath: proxmox.yaml }
+              - { path: /app/config/custom.css, subPath: custom.css }
+              - { path: /app/config/custom.js, subPath: custom.js }
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/config/logs
