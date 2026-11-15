@@ -48,12 +48,11 @@ jobs:
         uses: home-operations/flate/action@bbb6ebc344da051752dbdb1b413860ceffcfb63d # v0.7.3
 
       - name: Run Flate
-        run: |
-          # A base branch without kubernetes/apps has nothing to compare against
-          if ! git cat-file -e "origin/${FLATE_BASE:-main}:kubernetes/apps" 2>/dev/null; then
-            unset FLATE_BASE
-          fi
-          flate test all -p ./kubernetes/apps
+        # The action sets FLATE_BASE, which limits the test to resources that
+        # changed. Testing everything takes seconds and avoids a false failure
+        # when a Kustomization changes but the HelmRelease it health-checks
+        # does not ("still Pending: waiting for declaration", flate 0.7.3).
+        run: env -u FLATE_BASE flate test all -p ./kubernetes/apps
 
   success:
     if: ${{ !cancelled() }}

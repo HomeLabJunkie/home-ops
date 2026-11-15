@@ -21,5 +21,8 @@ bases:
 defaultInherit: default
 
 releases:
+  - name: envoy-gateway
+    namespace: network
+
   - name: snapshot-controller
     namespace: kube-system
