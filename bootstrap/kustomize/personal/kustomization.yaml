@@ -6,3 +6,4 @@ kind: Kustomization
 resources:
   - ./external-secrets
   - ./flux-system
+  - ./network

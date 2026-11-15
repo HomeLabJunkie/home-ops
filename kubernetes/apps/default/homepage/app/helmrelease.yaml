@@ -1,6 +1,8 @@
 ---
 # Homepage (https://homepage.jeffriffle.com), behind Authelia. No database:
-# the config is the homepage-config ConfigMap built from ./config in git.
+# the config is the homepage-config ConfigMap built from ./config in git, plus
+# services.yaml and settings.yaml from the homepage-private ConfigMap (built
+# from the private repo: they list the services outside the cluster).
 # /app/config is read-only here, so EVERY file in the image's skeleton
 # (/app/src/skeleton) must be mounted: a missing one makes Homepage try to
 # copy it in and exit (2.8 added proxmox.yaml). Check after upgrades:
@@ -100,8 +102,6 @@ spec:
         advancedMounts:
           homepage:
             app:
-              - { path: /app/config/services.yaml, subPath: services.yaml }
-              - { path: /app/config/settings.yaml, subPath: settings.yaml }
               - { path: /app/config/widgets.yaml, subPath: widgets.yaml }
               - { path: /app/config/kubernetes.yaml, subPath: kubernetes.yaml }
               - { path: /app/config/bookmarks.yaml, subPath: bookmarks.yaml }
@@ -109,6 +109,14 @@ spec:
               - { path: /app/config/proxmox.yaml, subPath: proxmox.yaml }
               - { path: /app/config/custom.css, subPath: custom.css }
               - { path: /app/config/custom.js, subPath: custom.js }
+      private:
+        type: configMap
+        name: homepage-private
+        advancedMounts:
+          homepage:
+            app:
+              - { path: /app/config/services.yaml, subPath: services.yaml }
+              - { path: /app/config/settings.yaml, subPath: settings.yaml }
       logs:
         type: emptyDir
         globalMounts:

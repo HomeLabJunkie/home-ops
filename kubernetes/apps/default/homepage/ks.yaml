@@ -4,6 +4,8 @@ kind: Kustomization
 metadata:
   name: homepage
 spec:
+  dependsOn:
+    - name: homepage-private
   interval: 1h
   path: ./kubernetes/apps/default/homepage/app
   prune: true
@@ -14,3 +16,22 @@ spec:
   targetNamespace: default
   wait: true
   timeout: 10m
+---
+# services.yaml and settings.yaml: the list of services outside the cluster,
+# with LAN addresses, from the private repo (see flux-system/private-repo)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: homepage-private
+spec:
+  dependsOn:
+    - name: private-repo
+      namespace: flux-system
+  interval: 1h
+  path: ./homepage/kubernetes
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-private
+    namespace: flux-system
+  targetNamespace: default

@@ -29,6 +29,7 @@ jobs:
           files: |
             kubernetes/apps/**
             kubernetes/components/**
+            .github/flate/**
 
   flate:
     if: ${{ needs.filter.outputs.any-changed == 'true' }}
@@ -52,7 +53,7 @@ jobs:
         # changed. Testing everything takes seconds and avoids a false failure
         # when a Kustomization changes but the HelmRelease it health-checks
         # does not ("still Pending: waiting for declaration", flate 0.7.3).
-        run: env -u FLATE_BASE flate test all -p ./kubernetes/apps
+        run: env -u FLATE_BASE flate test all -p ./kubernetes/apps --supply .github/flate/supply.yaml
 
   success:
     if: ${{ !cancelled() }}

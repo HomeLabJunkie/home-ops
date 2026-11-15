@@ -34,7 +34,6 @@ spec:
               SMTP_HOST: smtp.gmail.com
               SMTP_PORT: "587"
               SMTP_SECURITY: starttls
-              SMTP_FROM: REDACTED@example.com
               SMTP_FROM_NAME: Vaultwarden
             envFrom:
               - secretRef:

@@ -8,6 +8,10 @@ spec:
     - name: cloudflare-dns # provides the DNSEndpoint CRD
   interval: 1h
   path: ./kubernetes/apps/network/cloudflare-tunnel/app
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cloudflare-tunnel-id-secret # placed at bootstrap (bootstrap/kustomize)
   prune: true
   sourceRef:
     kind: GitRepository

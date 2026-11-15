@@ -1,0 +1,20 @@
+---
+# A second, private Git source. This public repository holds no details of the
+# home network; the few files that do (Homepage's list of non-cluster services
+# with LAN addresses) come from HomeLabJunkie/k3s-homelab-private. Only the
+# folder named below is fetched.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.toolkit.fluxcd.io/gitrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: home-ops-private
+spec:
+  interval: 30m
+  url: ssh://git@github.com/HomeLabJunkie/k3s-homelab-private.git
+  ref:
+    branch: main
+  secretRef:
+    name: private-repo-deploy-key
+  ignore: |
+    /*
+    !/homepage/kubernetes/

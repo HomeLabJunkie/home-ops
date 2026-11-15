@@ -131,6 +131,9 @@ Nothing secret is stored in this repository, encrypted or otherwise.
   `talosctl` and never written to disk.
 - **In CI and before every commit**, [gitleaks](https://github.com/gitleaks/gitleaks) scans for
   anything that looks like a credential.
+- **Details of the home network** that are not secrets but don't belong in public (the list of
+  services outside the cluster, with LAN addresses) live in a private repository. Flux pulls just
+  that one folder from it as a second source.
 
 ## Backups
 
