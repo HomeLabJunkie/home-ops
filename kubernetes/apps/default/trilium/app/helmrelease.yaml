@@ -79,7 +79,7 @@ spec:
           gethomepage.dev/name: Trilium
           gethomepage.dev/group: Apps
           gethomepage.dev/icon: trilium.svg
-          gethomepage.dev/description: notes
+          gethomepage.dev/description: notes (main)
           gethomepage.dev/pod-selector: app.kubernetes.io/name=trilium
         hostnames:
           - trilium.jeffriffle.com
