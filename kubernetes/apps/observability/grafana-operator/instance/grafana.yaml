@@ -1,0 +1,80 @@
+---
+# Grafana managed by grafana-operator (modeled on onedr0p/home-ops). Single
+# login: Authelia (SecurityPolicy grafana-authelia) passes Remote-User and
+# Grafana's auth proxy trusts it; networkpolicy.yaml keeps anything but the
+# external Envoy from setting that header. Local user admin (password in
+# grafana-admin, from Bitwarden) remains for the operator's API calls.
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  labels:
+    dashboards: grafana
+spec:
+  config:
+    analytics:
+      check_for_updates: "false"
+      check_for_plugin_updates: "false"
+      feedback_links_enabled: "false"
+      reporting_enabled: "false"
+    auth:
+      disable_login_form: "true"
+      signout_redirect_url: https://auth.jeffriffle.com/logout
+    auth.anonymous:
+      enabled: "false"
+    auth.proxy:
+      enabled: "true"
+      header_name: Remote-User
+      header_property: username
+      headers: Email:Remote-Email Name:Remote-Name
+      auto_sign_up: "true"
+    users:
+      auto_assign_org_role: Admin # only Authelia group admins get through
+    log:
+      mode: console
+    news:
+      news_feed_enabled: "false"
+    plugins:
+      plugin_admin_enabled: "false"
+      preinstall_auto_update: "false" # bundled plugins live on the read-only root fs
+    server:
+      root_url: https://grafana.jeffriffle.com
+      enable_gzip: "true"
+  deployment:
+    spec:
+      strategy:
+        type: Recreate
+      template:
+        spec:
+          containers:
+            - name: grafana
+              env:
+                - name: GF_SECURITY_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin
+                      key: GF_SECURITY_ADMIN_PASSWORD
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile: { type: RuntimeDefault }
+          volumes:
+            - name: grafana-data
+              persistentVolumeClaim:
+                claimName: grafana-pvc
+  persistentVolumeClaim:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+      storageClassName: longhorn-nobackup
+  disableDefaultSecurityContext: All

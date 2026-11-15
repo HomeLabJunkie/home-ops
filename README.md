@@ -5,6 +5,11 @@
 _My home Kubernetes cluster, run as code:_
 _[Talos Linux](https://www.talos.dev) on six mini PCs, deployed by [Flux](https://fluxcd.io), kept current by [Renovate](https://github.com/renovatebot/renovate)_
 
+[![Talos](https://kromgo.jeffriffle.com/badges/talos_version)](https://talos.dev)&nbsp;&nbsp; [![Kubernetes](https://kromgo.jeffriffle.com/badges/kubernetes_version)](https://kubernetes.io)&nbsp;&nbsp; [![Flux](https://kromgo.jeffriffle.com/badges/flux_version)](https://fluxcd.io)&nbsp;&nbsp;
+![Renovate](https://img.shields.io/badge/renovate-enabled-blue?logo=renovatebot)
+
+[![Age](https://kromgo.jeffriffle.com/badges/cluster_birth_age)](https://github.com/home-operations/kromgo)&nbsp;&nbsp; [![Uptime](https://kromgo.jeffriffle.com/badges/cluster_uptime_age)](https://github.com/home-operations/kromgo)&nbsp;&nbsp; [![Nodes](https://kromgo.jeffriffle.com/badges/cluster_node_count)](https://github.com/home-operations/kromgo)&nbsp;&nbsp; [![Pods](https://kromgo.jeffriffle.com/badges/cluster_pod_count)](https://github.com/home-operations/kromgo)&nbsp;&nbsp; [![CPU](https://kromgo.jeffriffle.com/badges/cluster_cpu_usage)](https://github.com/home-operations/kromgo)&nbsp;&nbsp; [![Memory](https://kromgo.jeffriffle.com/badges/cluster_memory_usage)](https://github.com/home-operations/kromgo)&nbsp;&nbsp; [![Alerts](https://kromgo.jeffriffle.com/badges/cluster_alert_count)](https://github.com/home-operations/kromgo)
+
 </div>
 
 > [!NOTE]
@@ -64,7 +69,7 @@ KVM for console access.
 | Backups          | [Kopiur](https://github.com/home-operations/kopiur) ([Kopia](https://kopia.io)) to S3 and a NAS replica                                                          |
 | Upgrades         | [tuppr](https://github.com/home-operations/tuppr) for Talos and Kubernetes; [Renovate](https://github.com/renovatebot/renovate) for everything                   |
 | Observability    | [Prometheus](https://prometheus.io), [Grafana](https://grafana.com), [VictoriaLogs](https://docs.victoriametrics.com/victorialogs), [Vector](https://vector.dev) |
-| Status badges    | [kromgo](https://github.com/home-operations/kromgo)                                                                                                              |
+| Status badges    | [kromgo](https://github.com/home-operations/kromgo): the live badges at the top of this page                                                                     |
 
 ## How a change reaches the cluster
 

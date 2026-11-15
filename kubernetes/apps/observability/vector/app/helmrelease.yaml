@@ -1,0 +1,107 @@
+---
+# Talos system logs (machined, kubelet, etcd, containerd, ... and the kernel
+# ring buffer) into victoria-logs. Talos can only send JSON lines over raw
+# TCP/UDP, which VictoriaLogs doesn't accept, so a Vector DaemonSet on the
+# host network listens on 127.0.0.1:6050 on every node and forwards to
+# VictoriaLogs. Talos side: cluster patch 206-log-shipping in talos-prodesk
+# (machine.logging.destinations + KmsgLogConfig, both tcp://127.0.0.1:6050/).
+# Query: _stream:{source="talos"}; fields node, stream (service|kernel),
+# service, level.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vector
+spec:
+  chart:
+    spec:
+      chart: vector
+      version: 0.61.0
+      sourceRef:
+        kind: HelmRepository
+        name: vector
+  interval: 1h
+  values:
+    fullnameOverride: vector
+    role: Agent
+    podHostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+    rbac:
+      create: false # only needed for the kubernetes_logs source
+    service:
+      enabled: false
+    defaultVolumes: []
+    defaultVolumeMounts: []
+    persistence:
+      hostPath:
+        enabled: false # data dir on an emptyDir; nothing is buffered to disk
+    tolerations:
+      - operator: Exists
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65534
+      runAsGroup: 65534
+      fsGroup: 65534
+      seccompProfile: { type: RuntimeDefault }
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities: { drop: ["ALL"] }
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    podMonitor:
+      enabled: true
+    customConfig:
+      data_dir: /vector-data-dir
+      api:
+        enabled: false
+      sources:
+        talos:
+          type: socket
+          mode: tcp
+          address: 127.0.0.1:6050
+          decoding:
+            codec: json
+        internal_metrics:
+          type: internal_metrics
+      transforms:
+        talos_fields:
+          type: remap
+          inputs: [talos]
+          source: |
+            .source = "talos"
+            .node = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
+            if exists(.facility) {
+              .stream = "kernel"
+              .service = "kernel"
+            } else {
+              .stream = "service"
+              .service = string(del(."talos-service")) ?? "unknown"
+            }
+            .level = del(."talos-level")
+            .timestamp = del(."talos-time") # VictoriaLogs uses arrival time if absent
+            .message = del(.msg)
+            del(.host)
+            del(.port)
+            del(.source_type)
+      sinks:
+        victoria_logs:
+          type: elasticsearch
+          inputs: [talos_fields]
+          endpoints:
+            - http://victoria-logs.observability.svc.cluster.local:9428/insert/elasticsearch/
+          api_version: v8
+          compression: gzip
+          healthcheck:
+            enabled: false
+          query:
+            _msg_field: message
+            _time_field: timestamp
+            _stream_fields: source,node,stream,service
+        prom_exporter:
+          type: prometheus_exporter
+          inputs: [internal_metrics]
+          address: 0.0.0.0:9598

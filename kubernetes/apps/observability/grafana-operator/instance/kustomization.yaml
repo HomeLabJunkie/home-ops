@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../../../../components/authelia-gate
+resources:
+  - ./externalsecret.yaml
+  - ./grafana.yaml
+  - ./grafanadatasource.yaml
+  - ./grafanadashboard.yaml
+  - ./servicemonitor.yaml
+  - ./httproute.yaml
+  - ./securitypolicy.yaml
+  - ./networkpolicy.yaml
+configMapGenerator:
+  - name: grafana-dashboard-logs
+    files:
+      - ./dashboards/logs.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled # dashboard uses $vars

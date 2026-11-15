@@ -1,0 +1,84 @@
+---
+# Prometheus, Alertmanager, node-exporter, kube-state-metrics and the default
+# rules; Grafana runs separately (grafana-operator). Modeled on
+# onedr0p/home-ops. Control-plane metrics endpoints are opened in
+# talos/controlplane.yaml.j2.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kube-prometheus-stack
+  interval: 1h
+  valuesFrom:
+    - kind: ConfigMap
+      name: flux-metrics-configmap
+      valuesKey: flux-metrics.yaml
+  values:
+    cleanPrometheusOperatorObjectNames: true
+    alertmanager:
+      # The whole alertmanager.yaml (email over Gmail SMTP) is rendered by the
+      # alertmanager-email ExternalSecret from values in Bitwarden.
+      alertmanagerSpec:
+        externalUrl: https://alertmanager.jeffriffle.com
+        useExistingSecret: true
+        configSecret: alertmanager-email
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn-nobackup
+              resources:
+                requests:
+                  storage: 1Gi
+    kubeEtcd:
+      service:
+        selector:
+          component: kube-apiserver # etcd runs on the control plane nodes (:2381)
+    kubeProxy:
+      enabled: false # Cilium replaces kube-proxy
+    prometheus:
+      prometheusSpec:
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        scrapeConfigSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        retention: 15d
+        retentionSize: 18GiB
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            memory: 4Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn-nobackup
+              resources:
+                requests:
+                  storage: 20Gi
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+    grafana:
+      enabled: false
+      forceDeployDashboards: true
+      operator:
+        dashboardsConfigMapRefEnabled: true
+        folder: kubernetes
+        matchLabels:
+          dashboards: grafana
+    additionalPrometheusRulesMap:
+      oom-rules:
+        groups:
+          - name: oom
+            rules:
+              - alert: OomKilled
+                annotations:
+                  summary: Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes.
+                expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+                labels:
+                  severity: critical

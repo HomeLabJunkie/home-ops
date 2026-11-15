@@ -1,0 +1,505 @@
+{
+  "title": "Logs",
+  "uid": "prodesk-logs",
+  "tags": ["logs", "victorialogs", "talos"],
+  "timezone": "browser",
+  "refresh": "",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "ds",
+        "label": "Data source",
+        "type": "datasource",
+        "query": "victoriametrics-logs-datasource",
+        "hide": 2,
+        "current": {
+          "text": "victoria-logs",
+          "value": "victoria-logs"
+        }
+      },
+      {
+        "name": "search",
+        "label": "Search (regex, case-insensitive)",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      },
+      {
+        "name": "namespace",
+        "label": "Namespace",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "kubernetes.pod_namespace",
+          "query": "kubernetes.pod_namespace:*",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "pod",
+        "label": "Pod",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "kubernetes.pod_name",
+          "query": "kubernetes.pod_namespace:in($namespace)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "container",
+        "label": "Container",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "kubernetes.container_name",
+          "query": "kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "talos_node",
+        "label": "Talos node",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "node",
+          "query": "_stream:{source=\"talos\"}",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "talos_service",
+        "label": "Talos service",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "service",
+          "query": "_stream:{source=\"talos\"} node:in($talos_node)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "talos_level",
+        "label": "Talos level",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "level",
+          "query": "_stream:{source=\"talos\"} node:in($talos_node) service:in($talos_service)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Pod logs (namespace / pod / container filters)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Pod log lines by namespace",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "expr": "kubernetes.pod_namespace:* kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) kubernetes.container_name:in($container) ~\"(?i)$search\" | stats by (kubernetes.pod_namespace) count() lines",
+          "legendFormat": "{{kubernetes.pod_namespace}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Pod error-looking lines by namespace",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "expr": "kubernetes.pod_namespace:* kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) kubernetes.container_name:in($container) ~\"(?i)$search\" ~\"(?i)(error|fail|panic|fatal)\" | stats by (kubernetes.pod_namespace) count() errors",
+          "legendFormat": "{{kubernetes.pod_namespace}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "Pod logs",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "instant",
+          "editorMode": "code",
+          "expr": "kubernetes.pod_namespace:* kubernetes.pod_namespace:in($namespace) kubernetes.pod_name:in($pod) kubernetes.container_name:in($container) ~\"(?i)$search\"",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showLabels": false,
+        "showCommonLabels": false
+      }
+    },
+    {
+      "id": 5,
+      "type": "row",
+      "title": "Talos system logs (node / service / level filters)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Talos log lines by node",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"talos\"} node:in($talos_node) service:in($talos_service) level:in($talos_level) ~\"(?i)$search\" | stats by (node) count() lines",
+          "legendFormat": "{{node}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Talos warnings and errors by service",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"talos\"} node:in($talos_node) service:in($talos_service) level:in($talos_level) ~\"(?i)$search\" (level:in(\"warn\",\"error\",\"crit\",\"fatal\") OR ~\"(?i)(error|fail|panic|fatal)\") | stats by (service) count() lines",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "logs",
+      "title": "Talos logs",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "instant",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"talos\"} node:in($talos_node) service:in($talos_service) level:in($talos_level) ~\"(?i)$search\"",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showLabels": false,
+        "showCommonLabels": false
+      }
+    }
+  ]
+}
