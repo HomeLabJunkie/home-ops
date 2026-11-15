@@ -1,0 +1,156 @@
+---
+# jeffriffle.com: a static site. Each pod pulls the built site (branch
+# "deploy", written by the site repo's publish workflow) with git-sync every
+# minute and serves it with nginx, so a merge in the site repo is live about
+# a minute later. Nothing is stored: a new pod clones the branch again.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: website
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: website
+  interval: 1h
+  values:
+    controllers:
+      website:
+        replicas: 2
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: website
+        initContainers:
+          # Clone once before nginx starts, so a new pod never serves an empty site
+          git-clone: &gitsync
+            image:
+              repository: registry.k8s.io/git-sync/git-sync
+              tag: v4.8.0
+            args:
+              - --repo=git@github.com:HomeLabJunkie/jeffriffle.com.git
+              - --ref=deploy
+              - --depth=1
+              - --root=/git
+              - --link=current
+              - --ssh-key-file=/etc/git-secret/ssh
+              - --ssh-known-hosts-file=/etc/git-known-hosts/known_hosts
+              - --one-time
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+        containers:
+          git-sync:
+            <<: *gitsync
+            args:
+              - --repo=git@github.com:HomeLabJunkie/jeffriffle.com.git
+              - --ref=deploy
+              - --depth=1
+              - --root=/git
+              - --link=current
+              - --ssh-key-file=/etc/git-secret/ssh
+              - --ssh-known-hosts-file=/etc/git-known-hosts/known_hosts
+              - --period=60s
+              - --max-failures=10
+            resources:
+              requests:
+                cpu: 5m
+              limits:
+                memory: 128Mi
+          app:
+            image:
+              repository: docker.io/nginxinc/nginx-unprivileged
+              tag: 1.31-alpine
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &port 8080
+                  periodSeconds: 30
+              readiness: *probes
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 5m
+              limits:
+                memory: 64Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65533 # git-sync's user; nginx only reads
+        runAsGroup: 65533
+        fsGroup: 65533
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: website
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: jeffriffle.com
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: mdi-web
+          gethomepage.dev/description: website
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=website
+        hostnames:
+          - jeffriffle.com
+          - www.jeffriffle.com # Cloudflare redirects www to the apex
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      git:
+        type: emptyDir
+        advancedMounts:
+          website:
+            git-clone: [{ path: /git }]
+            git-sync: [{ path: /git }]
+            app: [{ path: /git, readOnly: true }]
+      git-secret:
+        type: secret
+        name: website-git-secret
+        defaultMode: 0400
+        advancedMounts:
+          website:
+            git-clone: [{ path: /etc/git-secret, readOnly: true }]
+            git-sync: [{ path: /etc/git-secret, readOnly: true }]
+      known-hosts:
+        type: configMap
+        name: website-known-hosts
+        advancedMounts:
+          website:
+            git-clone: [{ path: /etc/git-known-hosts, readOnly: true }]
+            git-sync: [{ path: /etc/git-known-hosts, readOnly: true }]
+      nginx-config:
+        type: configMap
+        name: website-nginx
+        advancedMounts:
+          website:
+            app: [{ path: /etc/nginx/conf.d/default.conf, subPath: default.conf, readOnly: true }]
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          website:
+            git-clone: [{ path: /tmp }]
+            git-sync: [{ path: /tmp }]
+            app: [{ path: /tmp }]
