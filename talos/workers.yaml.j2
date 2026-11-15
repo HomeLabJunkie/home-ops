@@ -1,0 +1,6 @@
+---
+machine:
+  type: worker
+  # ca merges as a unit; workers get the certificate only, never the key
+  ca:
+    crt: {{ ENV.MACHINE_CA_CRT }}

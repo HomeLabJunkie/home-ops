@@ -61,6 +61,18 @@
       },
       minimumReleaseAge: "3 days",
     },
+    {
+      description: "Hold Kubernetes on 1.36 until Cilium supports 1.37",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/kube-apiserver/",
+        "/kube-controller-manager/",
+        "/kube-proxy/",
+        "/kube-scheduler/",
+        "/kubelet/",
+      ],
+      allowedVersions: "<1.37.0",
+    },
     // Labeling rules
     {
       matchUpdateTypes: ["major"],
