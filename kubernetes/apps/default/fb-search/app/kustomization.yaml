@@ -6,9 +6,3 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
-configMapGenerator:
-  - name: fb-search-known-hosts
-    files:
-      - ./resources/known_hosts
-generatorOptions:
-  disableNameSuffixHash: true

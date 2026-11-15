@@ -2,10 +2,8 @@
 # fb-search (jeffriffle.com/fb-search): a small FastAPI app that searches
 # Facebook Marketplace with a headless Chromium (Playwright). Source:
 # HomeLabJunkie/fb-marketplace-hunter.
-# For now it runs like it did on Unraid: init containers clone the repo and
-# install the pinned, hash-checked requirements into a scratch volume, then
-# the app runs in Microsoft's Playwright image (it ships Chromium). A
-# purpose-built image will replace this.
+# The image is built by GitHub Actions in that repo on every merge to main
+# (ghcr.io/homelabjunkie/fb-search, private; pulled with fb-search-ghcr).
 # Single replica on purpose: the login lockout and the one-search-at-a-time
 # lock live in memory.
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
@@ -24,60 +22,12 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          git-clone:
-            image:
-              repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.8.0
-            args:
-              - --repo=git@github.com:HomeLabJunkie/fb-marketplace-hunter.git
-              - --ref=main
-              - --depth=1
-              - --root=/src
-              - --link=current
-              - --ssh-key-file=/etc/git-secret/ssh
-              - --ssh-known-hosts-file=/etc/git-known-hosts/known_hosts
-              - --git-config=safe.directory:/src
-              - --one-time
-            securityContext:
-              runAsUser: 65533 # git-sync's own user: ssh needs a passwd entry
-              runAsGroup: 65533
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-          pip-install:
-            image: &playwright
-              repository: mcr.microsoft.com/playwright/python
-              tag: v1.63.0-noble
-            command:
-              - pip
-              - install
-              - --no-cache-dir
-              - --require-hashes
-              - --target=/deps
-              - --requirement=/src/current/requirements.txt
-            env:
-              HOME: /tmp
-            securityContext: &securityContext
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
         containers:
           app:
-            image: *playwright
-            workingDir: /src/current
-            command:
-              - python
-              - -m
-              - uvicorn
-              - webapp:app
-              - --host=0.0.0.0
-              - --port=8000
-              - --proxy-headers
-              - --forwarded-allow-ips=*
+            image:
+              repository: ghcr.io/homelabjunkie/fb-search
+              tag: 529f1371a3c44b6d0829ef294aed16c122accb64@sha256:3b69feebf221c0ff9becda69d8e8fad10e702a83c244d1ed03c3e811d91ca2b8
             env:
-              HOME: /tmp
-              PYTHONPATH: /deps
               MARKETPLACE_LOCATION: Bellevue, NE
               FB_SLUG_CACHE: /cache/slugs.json
               METRICS_PORT: &metrics 9100
@@ -95,7 +45,10 @@ spec:
                   periodSeconds: 30
                   timeoutSeconds: 5
               readiness: *probes
-            securityContext: *securityContext
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 50m
@@ -103,6 +56,8 @@ spec:
                 cpu: "1"
                 memory: 1536Mi
     defaultPodOptions:
+      imagePullSecrets:
+        - name: fb-search-ghcr
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -145,42 +100,11 @@ spec:
         advancedMounts:
           fb-search:
             app: [{ path: /cache }]
-      src:
-        type: emptyDir
-        advancedMounts:
-          fb-search:
-            git-clone: [{ path: /src }]
-            pip-install: [{ path: /src, readOnly: true }]
-            app: [{ path: /src, readOnly: true }]
-      deps:
-        type: emptyDir
-        advancedMounts:
-          fb-search:
-            pip-install: [{ path: /deps }]
-            app: [{ path: /deps, readOnly: true }]
-      git-secret:
-        type: secret
-        name: fb-search-secret
-        defaultMode: 0400
-        items:
-          - key: ssh
-            path: ssh
-        advancedMounts:
-          fb-search:
-            git-clone: [{ path: /etc/git-secret, readOnly: true }]
-      known-hosts:
-        type: configMap
-        name: fb-search-known-hosts
-        advancedMounts:
-          fb-search:
-            git-clone: [{ path: /etc/git-known-hosts, readOnly: true }]
       tmp:
         type: emptyDir
         sizeLimit: 512Mi
         advancedMounts:
           fb-search:
-            git-clone: [{ path: /tmp }]
-            pip-install: [{ path: /tmp }]
             app: [{ path: /tmp }]
       shm:
         type: emptyDir
