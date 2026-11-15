@@ -40,6 +40,7 @@ apiVersion: v1alpha1
 kind: KubeAPIServerConfig
 certExtraSANs:
   - 192.168.1.209
+  - k8s.skynet
 extraArgs:
   enable-aggregator-routing: "true"
 image: registry.k8s.io/kube-apiserver:v1.36.6

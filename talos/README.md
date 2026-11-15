@@ -29,8 +29,9 @@ rendered on demand and pushed to nodes with `talosctl`.
 | `talos-6` | Worker        | `192.168.1.214` |
 
 Addresses come from DHCP reservations on the router, so node files carry only a hostname. The
-Kubernetes API is reached at `https://192.168.1.209:6443`, a layer 2 virtual IP held by whichever
-control plane is healthy. Control planes are not tainted: with six small nodes, they run workloads
+Kubernetes API is reached at `https://192.168.1.209:6443` (`k8s.skynet`), a layer 2 virtual IP held
+by whichever control plane is healthy. The router keeps a placeholder DHCP reservation for that
+address so it is never handed to another device. Control planes are not tainted: with six small nodes, they run workloads
 too.
 
 Every node has two disks. Talos installs to the NVMe; the SATA SSD becomes the `longhorn` user
