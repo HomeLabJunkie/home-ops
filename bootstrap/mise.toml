@@ -78,11 +78,12 @@ fi
 '''
 
 # Wait until every apiserver answers /readyz. Helm and kubectl calls after this stage are not retried.
+# Only control planes run an apiserver: they are the talosconfig endpoints.
 [tasks.api-ready]
 hide = true
 run = '''
 mise run //:log info "Running stage..." stage "$MISE_TASK_NAME"
-nodes="$(talosctl config info -o yaml | yq -r -e '.nodes | join (" ")')"
+nodes="$(talosctl config info -o yaml | yq -r -e '.endpoints | join (" ")')"
 for n in $nodes; do
     until [[ "$(curl -ks -o /dev/null -w '%{http_code}' --connect-timeout 2 "https://${n}:6443/readyz")" == "200" ]]; do
         mise run //:log info "Waiting for kube-apiserver. Retrying in 5 seconds..." stage "$MISE_TASK_NAME" node "$n"

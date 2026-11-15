@@ -5,7 +5,6 @@ components:
   - ../../../../components/authelia-gate
 resources:
   - ./helmrepository.yaml
-  - ./recurringjob.yaml
   - ./storageclass-nobackup.yaml
   - ./volumesnapshotclass.yaml
   - ./networkpolicy-metrics.yaml

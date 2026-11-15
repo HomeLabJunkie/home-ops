@@ -14,3 +14,21 @@ spec:
   targetNamespace: longhorn-system
   wait: true
   timeout: 15m
+---
+# Longhorn custom resources (the backup schedule). Separate from the chart's
+# Kustomization because their CRDs only exist once the chart is installed.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: longhorn-config
+spec:
+  dependsOn:
+    - name: longhorn
+  interval: 1h
+  path: ./kubernetes/apps/longhorn-system/longhorn/config
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: longhorn-system
