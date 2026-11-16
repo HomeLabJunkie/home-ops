@@ -14,6 +14,16 @@
   // open PR each time main moves.
   rebaseWhen: "conflicted",
   packageRules: [
+    {
+      // Private GHCR image: Mend's hosted Renovate has no credentials for it
+      // ("no docker auth found"). fb-search is shipped by hand: merge in
+      // fb-marketplace-hunter, its Image workflow builds it, then bump the tag
+      // and digest here.
+      description: "Skip the private fb-search image",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/homelabjunkie/fb-search"],
+      enabled: false,
+    },
     // Grouping rules
     {
       description: "GitHub Actions Group",
