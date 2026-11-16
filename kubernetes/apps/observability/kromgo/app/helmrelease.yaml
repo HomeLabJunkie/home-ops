@@ -73,6 +73,15 @@ spec:
           query: alertmanager_alerts{state="active"} - 1 # Ignore Watchdog
           colorExpr: 'colorScale(result, [1.0], ["green", "red"])'
 
+        # Health check for Uptime Kuma (not a README badge): "up" while
+        # Prometheus can scrape the CloudNativePG operator
+        - title: CNPG
+          id: cnpg_operator
+          query: sum(up{job="cnpg-system/cloudnative-pg"}) or vector(0)
+          valueExpr: 'result >= 1 ? "up" : "down"'
+          colorExpr: 'result >= 1 ? "green" : "red"'
+          icon: si:postgresql
+
     httpRoute:
       enabled: true
       parentRefs:
