@@ -43,18 +43,18 @@ The layout and patterns follow [onedr0p/home-ops](https://github.com/onedr0p/hom
 
 Six **HP ProDesk 405 G4 Desktop Mini** PCs in a small rack, behind one managed gigabit switch.
 
-| Node      | Role          | CPU                              | RAM   | OS disk     | Data disk       |
-| --------- | ------------- | -------------------------------- | ----- | ----------- | --------------- |
-| `talos-1` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD   |
-| `talos-2` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 960 GB SATA SSD |
-| `talos-3` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 960 GB SATA SSD |
-| `talos-4` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 16 GB | 256 GB NVMe | 1 TB SATA SSD   |
-| `talos-5` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 16 GB | 256 GB NVMe | 960 GB SATA SSD |
-| `talos-6` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD   |
+| Node      | Role          | CPU                              | RAM   | OS disk     | Data disk     |
+| --------- | ------------- | -------------------------------- | ----- | ----------- | ------------- |
+| `talos-1` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos-2` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos-3` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos-4` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos-5` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos-6` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
 
 Supporting machines outside the cluster: an Unraid server (S3 object storage, single sign-on,
 other self-hosted apps), a NAS (backup target), an OPNsense router (DNS, DHCP) and a Raspberry Pi
-KVM for console access.
+KVM for console access, and another Raspberry Pi5 runs Kuma for uptime monitoring and alerting as well.
 
 ## Components
 
