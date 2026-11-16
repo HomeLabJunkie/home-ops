@@ -27,8 +27,9 @@ spec:
               tag: b544ca5bd6174d2272d92dc63d283468efd2a8df@sha256:64279b17634f35fe68bcf29aac890e2ebc7cc932f59399c1ba2dbc59f480dfa0
             env:
               TZ: America/Chicago
-              # Authelia users let in (Remote-User); Authelia itself admits group admins
-              ALLOWED_USERS: jeff
+              # Authelia users let in (Remote-User). Authelia's only user is "admin"
+              # (Jeff); Authelia itself admits group admins.
+              ALLOWED_USERS: admin
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
