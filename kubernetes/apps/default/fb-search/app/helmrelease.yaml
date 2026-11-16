@@ -80,6 +80,14 @@ spec:
           - port: metrics
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: fb-search
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: facebook.svg
+          gethomepage.dev/description: Marketplace search
+          gethomepage.dev/href: https://jeffriffle.com/fb-search
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=fb-search
         hostnames:
           - jeffriffle.com
         parentRefs:
