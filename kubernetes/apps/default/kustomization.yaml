@@ -9,8 +9,10 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./atuin/ks.yaml
   - ./fb-search/ks.yaml
   - ./homepage/ks.yaml
+  - ./linkwarden/ks.yaml
   - ./trilium/ks.yaml
   - ./vaultwarden/ks.yaml
   - ./website/ks.yaml

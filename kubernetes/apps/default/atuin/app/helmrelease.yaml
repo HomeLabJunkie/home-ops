@@ -1,0 +1,85 @@
+---
+# Atuin sync server: shell history for the laptops, encrypted on each laptop
+# before upload (the server only stores ciphertext). LAN only: the route is on
+# envoy-internal, which external-dns does not publish; OPNsense resolves
+# atuin.jeffriffle.com to that gateway (192.168.1.12). SQLite on the "atuin"
+# PVC, backed up hourly by Kopiur.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: atuin
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: atuin
+  interval: 1h
+  values:
+    controllers:
+      atuin:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/atuinsh/atuin
+              tag: 18.24.8@sha256:2bc3a558b236283cd64ce64cf9aa463c24e34f97fc36a4b1a5b2b1853a5dcb49
+            env:
+              ATUIN_HOST: "0.0.0.0"
+              ATUIN_PORT: &port 80
+              ATUIN_OPEN_REGISTRATION: "true" # set to "false" once both laptops have registered
+              ATUIN_DB_URI: sqlite:///config/atuin.db
+              TZ: America/Chicago
+            args:
+              - start
+            probes:
+              liveness:
+                enabled: true
+                spec:
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *port
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.jeffriffle.com"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
