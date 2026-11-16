@@ -82,6 +82,15 @@ spec:
           colorExpr: 'result >= 1 ? "green" : "red"'
           icon: si:postgresql
 
+        # Health check for Uptime Kuma: "up" while the Linkwarden pod is
+        # available and every linkwarden-postgres instance reports in (the
+        # public URL alone only proves Authelia is up)
+        - title: Linkwarden
+          id: linkwarden_app
+          query: sum(kube_deployment_status_replicas_available{namespace="default",deployment="linkwarden"}) * min(cnpg_collector_up{namespace="default",cluster="linkwarden-postgres"}) or vector(0)
+          valueExpr: 'result >= 1 ? "up" : "down"'
+          colorExpr: 'result >= 1 ? "green" : "red"'
+
     httpRoute:
       enabled: true
       parentRefs:
