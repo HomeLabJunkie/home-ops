@@ -25,7 +25,7 @@ spec:
             env:
               ATUIN_HOST: "0.0.0.0"
               ATUIN_PORT: &port 80
-              ATUIN_OPEN_REGISTRATION: "true" # set to "false" once both laptops have registered
+              ATUIN_OPEN_REGISTRATION: "false" # account "jeff" exists; other laptops use `atuin login`
               ATUIN_DB_URI: sqlite:///config/atuin.db
               TZ: America/Chicago
             args:
