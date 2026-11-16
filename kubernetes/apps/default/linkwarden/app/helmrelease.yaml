@@ -26,8 +26,8 @@ spec:
             env:
               TZ: America/Chicago
               NEXTAUTH_URL: https://linkwarden.jeffriffle.com/api/v1/auth
-              # Open for the first sign-up; set to "true" once the account exists
-              NEXT_PUBLIC_DISABLE_REGISTRATION: "false"
+              # Account exists; new users would need this set back to "false"
+              NEXT_PUBLIC_DISABLE_REGISTRATION: "true"
             envFrom:
               - secretRef:
                   name: linkwarden-secret
