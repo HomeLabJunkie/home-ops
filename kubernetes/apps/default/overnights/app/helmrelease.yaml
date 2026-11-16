@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: ghcr.io/homelabjunkie/overnights
-              tag: aca1b2cd48ae29b21fde7d9ba5430fa55c489f42@sha256:370258044cb04dea82835717001a4b62ccee58863a026817ac31254cfa310cf6
+              tag: 7c9cb3e0253fc41e9b006ec8fe8ef3f72e56b6e1@sha256:14e599f4d74c076c3284e461045c7489588cc070687130de4e00b58c8f5e72cd
             env:
               TZ: America/Chicago
               # Authelia users let in (Remote-User). Authelia's only user is "admin"
