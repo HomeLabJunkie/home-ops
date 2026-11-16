@@ -6,6 +6,10 @@
     ":timezone(America/Chicago)",
   ],
   schedule: ["every weekend"],
+  // mise generates .mise/locks/** (npm package.json + lockfile per tool
+  // version); Renovate's npm manager must not edit them, the mise manager
+  // updates the pin in .mise/config.toml instead.
+  ignorePaths: [".mise/locks/**"],
   // Main does not require up-to-date branches, and `auto` would rebase every
   // open PR each time main moves.
   rebaseWhen: "conflicted",
