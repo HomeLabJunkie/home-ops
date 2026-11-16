@@ -1,0 +1,20 @@
+---
+# Barman Cloud plugin: CloudNativePG clusters stream WAL and take base backups
+# to S3 (the "cnpg" bucket of Garage on the unraid server) through it. Each
+# database declares its own ObjectStore and ScheduledBackup.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: barman-cloud
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: barman-cloud
+  interval: 1h
+  values:
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 256Mi

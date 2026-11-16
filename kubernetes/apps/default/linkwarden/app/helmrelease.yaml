@@ -1,0 +1,92 @@
+---
+# Linkwarden: bookmark manager that also archives each page (screenshot, PDF,
+# readable copy). Bookmarks live in PostgreSQL (../database, CloudNativePG);
+# the archives on the "linkwarden" PVC, backed up hourly by Kopiur.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: linkwarden
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: linkwarden
+  interval: 1h
+  values:
+    controllers:
+      linkwarden:
+        strategy: Recreate # archives on a ReadWriteOnce volume
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/linkwarden/linkwarden
+              tag: v2.17.0@sha256:7c11fde57d1a0c819b6de0079966eba3a33584d718464af7dacde22bd470ae46
+            env:
+              TZ: America/Chicago
+              NEXTAUTH_URL: https://linkwarden.jeffriffle.com/api/v1/auth
+              # Open for the first sign-up; set to "true" once the account exists
+              NEXT_PUBLIC_DISABLE_REGISTRATION: "false"
+            envFrom:
+              - secretRef:
+                  name: linkwarden-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &port 3000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *port
+                  periodSeconds: 10
+                  failureThreshold: 60
+            securityContext:
+              allowPrivilegeEscalation: false
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Linkwarden
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: linkwarden.svg
+          gethomepage.dev/description: bookmarks and page archive
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden
+        hostnames:
+          - linkwarden.jeffriffle.com
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /data/data
