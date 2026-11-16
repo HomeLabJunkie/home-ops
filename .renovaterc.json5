@@ -16,12 +16,12 @@
   packageRules: [
     {
       // Private GHCR image: Mend's hosted Renovate has no credentials for it
-      // ("no docker auth found"). fb-search is shipped by hand: merge in
-      // fb-marketplace-hunter, its Image workflow builds it, then bump the tag
-      // and digest here.
-      description: "Skip the private fb-search image",
+      // ("no docker auth found"). These are shipped by hand: merge in the
+      // app's repo (fb-marketplace-hunter, overnights), its Image workflow
+      // builds it, then bump the tag and digest here.
+      description: "Skip the private app images",
       matchDatasources: ["docker"],
-      matchPackageNames: ["ghcr.io/homelabjunkie/fb-search"],
+      matchPackageNames: ["ghcr.io/homelabjunkie/fb-search", "ghcr.io/homelabjunkie/overnights"],
       enabled: false,
     },
     // Grouping rules

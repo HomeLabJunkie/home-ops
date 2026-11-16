@@ -1,0 +1,96 @@
+---
+# overnights (skylar.jeffriffle.com): scheduled vs. actual overnights with a
+# printable report. Source: HomeLabJunkie/overnights (private); the image is
+# built by GitHub Actions there on every merge to main. All state is in
+# PostgreSQL (../database); DATABASE_URL comes from CloudNativePG's generated
+# "overnights-postgres-app" Secret.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: overnights
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: overnights
+  interval: 1h
+  values:
+    controllers:
+      overnights:
+        strategy: Recreate # one calendar-sync loop at a time
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/homelabjunkie/overnights
+              tag: b544ca5bd6174d2272d92dc63d283468efd2a8df@sha256:64279b17634f35fe68bcf29aac890e2ebc7cc932f59399c1ba2dbc59f480dfa0
+            env:
+              TZ: America/Chicago
+              # Authelia users let in (Remote-User); Authelia itself admits group admins
+              ALLOWED_USERS: jeff
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: overnights-postgres-app
+                    key: uri
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &port 8000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 96Mi
+              limits:
+                memory: 384Mi
+    defaultPodOptions:
+      imagePullSecrets:
+        - name: overnights-ghcr
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: overnights
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Overnights
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: mdi-calendar-month
+          gethomepage.dev/description: scheduled vs. actual overnights
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=overnights
+        hostnames:
+          - skylar.jeffriffle.com
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      tmp:
+        type: emptyDir
+        sizeLimit: 64Mi
+        globalMounts:
+          - path: /tmp
