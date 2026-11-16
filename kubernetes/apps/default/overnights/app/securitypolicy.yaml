@@ -1,0 +1,23 @@
+---
+# Every request to skylar.jeffriffle.com is checked by Authelia first
+# (Authelia rule: group admins, two_factor); the app itself then admits only
+# the users in ALLOWED_USERS (from the Remote-User header passed below).
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: overnights-authelia
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: overnights
+  extAuth:
+    failOpen: false
+    headersToExtAuth: [accept, cookie, proxy-authorization, x-forwarded-proto]
+    http:
+      backendRefs:
+        - name: authelia
+          port: 9091
+      path: /api/authz/ext-authz/
+      headersToBackend: [remote-user, remote-groups, remote-name, remote-email]
