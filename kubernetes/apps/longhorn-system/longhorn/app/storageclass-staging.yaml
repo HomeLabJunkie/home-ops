@@ -1,8 +1,10 @@
 ---
 # For Kopiur's temporary backup copies: every hour it restores a CSI snapshot
 # of each app volume into a staged volume, backs that up and deletes it. One
-# replica (it lives minutes and the source keeps three), kept next to the
-# backup job, and outside the nightly Longhorn backups.
+# replica (it lives minutes and the source keeps three), outside the nightly
+# Longhorn backups. Data locality stays off: with best-effort, Longhorn starts
+# moving the single replica to the backup job's node, kopiur deletes the
+# volume mid-move, and every run logs FailedRebuilding/Faulted warnings.
 # yaml-language-server: $schema=https://json.schemastore.org/storageclass
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -14,7 +16,7 @@ reclaimPolicy: Delete
 volumeBindingMode: Immediate
 parameters:
   numberOfReplicas: "1"
-  dataLocality: best-effort
+  dataLocality: disabled
   staleReplicaTimeout: "30"
   fsType: ext4
   dataEngine: v1
