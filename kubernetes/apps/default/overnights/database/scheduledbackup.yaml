@@ -9,6 +9,10 @@ spec:
   immediate: true
   backupOwnerReference: self
   method: plugin
+  # From the primary: it closes the backup's last WAL file and waits for it to
+  # upload. From a standby on an idle database that file stayed open, so the
+  # backup couldn't be restored until the next write (restore drill 2026-11-17)
+  target: primary
   pluginConfiguration:
     name: barman-cloud.cloudnative-pg.io
   cluster:
