@@ -48,3 +48,13 @@ spec:
               Kustomization {{ $labels.name }} in {{ $labels.exported_namespace }} is not ready
           labels:
             severity: critical
+
+        - alert: SourceReconciliationFailure
+          expr: |-
+            gotk_resource_info{customresource_kind=~"GitRepository|HelmChart|HelmRepository|OCIRepository", ready!="True"} == 1
+          for: 1h
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.name }} in {{ $labels.exported_namespace }} has failed to fetch for an hour
+          labels:
+            severity: warning
