@@ -23,6 +23,7 @@ spec:
       name: "*"
   exclusionList:
     - error.*lookup.*github
+    - lookup.*no such host
     - dial.*tcp.*timeout
     - dial.*tcp.*unreachable
     - waiting.*socket
