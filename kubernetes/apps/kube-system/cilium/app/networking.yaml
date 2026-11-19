@@ -4,9 +4,17 @@ kind: CiliumLoadBalancerIPPool
 metadata:
   name: pool
 spec:
-  allowFirstLastIPs: "No"
+  # Only the addresses reserved for cluster LoadBalancers. The whole /23
+  # let any new LoadBalancer Service take an address a LAN host already
+  # uses (on 2026-11-19 a test Service briefly took 192.168.1.18, deployrr).
+  # To expose another Service, add its address here and annotate it with
+  # lbipam.cilium.io/ips.
+  allowFirstLastIPs: "Yes" # each block is a single /32
   blocks:
-    - cidr: "192.168.0.0/23"
+    - cidr: "192.168.1.12/32" # envoy-internal
+    - cidr: "192.168.1.14/32" # k8s-gateway
+    - cidr: "192.168.1.17/32" # envoy-external
+    - cidr: "192.168.1.19/32" # trilium-sync
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
