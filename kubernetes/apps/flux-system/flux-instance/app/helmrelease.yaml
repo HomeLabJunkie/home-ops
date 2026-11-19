@@ -14,7 +14,9 @@ spec:
       fluxcd.controlplane.io/reconcileArtifactEvery: 1h
     instance:
       cluster:
-        networkPolicy: false
+        # Flux's own policies: only flux-system pods may fetch source
+        # artifacts; metrics scraping and the webhook receiver stay open.
+        networkPolicy: true
       sync:
         # SSH with a read-only deploy key while the repository is private
         url: ssh://git@github.com/HomeLabJunkie/home-ops.git

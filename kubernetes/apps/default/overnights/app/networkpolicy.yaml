@@ -1,0 +1,24 @@
+---
+# overnights admits users from the Remote-User header (set by Envoy from
+# Authelia), so only the external Envoy may reach it; any other pod could
+# otherwise send that header itself.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: overnights
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: overnights
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-external
+      ports:
+        - port: 8000
+          protocol: TCP
