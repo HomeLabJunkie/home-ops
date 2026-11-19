@@ -1,0 +1,32 @@
+---
+# The default class, taken over from the chart (persistence.createStorageClass:
+# false) because the chart template has no mountOptions. Same parameters the
+# chart rendered for Longhorn 1.13.0.
+# context=: Talos can't label CSI volumes, so the mount does (needs the CSI
+# plugin's SELinux config from csi-selinux-config.yaml). Mount options are
+# immutable, so Flux replaces the class when they change (force); existing
+# volumes are not affected.
+# yaml-language-server: $schema=https://json.schemastore.org/storageclass
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+    kustomize.toolkit.fluxcd.io/force: Enabled
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "3"
+  staleReplicaTimeout: "30"
+  fromBackup: ""
+  fsType: "ext4"
+  dataLocality: "disabled"
+  unmapMarkSnapChainRemoved: "ignored"
+  disableRevisionCounter: "true"
+  dataEngine: "v1"
+  backupTargetName: "default"
+mountOptions:
+  - context=system_u:object_r:ephemeral_t:s0
