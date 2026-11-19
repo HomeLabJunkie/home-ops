@@ -87,10 +87,26 @@ spec:
             del(.host)
             del(.port)
             del(.source_type)
+        # auditd can feed back on itself: VictoriaLogs' disk writes raise
+        # SELinux AVC records (permissive), which vector ships back to it,
+        # which writes more (talos-6, 2026-11-19: ~5800/min vs a few hundred).
+        # Cap audit records per node; everything else passes unthrottled.
+        split_audit:
+          type: route
+          inputs: [talos_fields]
+          route:
+            audit: '.service == "auditd"'
+        audit_throttle:
+          type: throttle
+          inputs: [split_audit.audit]
+          # escaped: the chart runs customConfig through Helm tpl
+          key_field: '{{ "{{" }} node {{ "}}" }}'
+          threshold: 1500
+          window_secs: 60
       sinks:
         victoria_logs:
           type: elasticsearch
-          inputs: [talos_fields]
+          inputs: [split_audit._unmatched, audit_throttle]
           endpoints:
             - http://victoria-logs.observability.svc.cluster.local:9428/insert/elasticsearch/
           api_version: v8
