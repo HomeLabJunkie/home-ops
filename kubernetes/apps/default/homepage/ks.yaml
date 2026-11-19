@@ -35,3 +35,32 @@ spec:
     name: home-ops-private
     namespace: flux-system
   targetNamespace: default
+  # The private repo only supplies one ConfigMap, so apply it with an
+  # identity that can manage ConfigMaps here and nothing else.
+  serviceAccountName: homepage-private-reconciler
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage-private-reconciler
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: homepage-private-reconciler
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: homepage-private-reconciler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: homepage-private-reconciler
+subjects:
+  - kind: ServiceAccount
+    name: homepage-private-reconciler
