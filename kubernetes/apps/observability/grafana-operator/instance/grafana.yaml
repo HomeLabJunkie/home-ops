@@ -32,6 +32,9 @@ spec:
       header_property: username
       headers: Email:Remote-Email Name:Remote-Name
       auto_sign_up: "true"
+      # Only pod addresses may use the header (the NetworkPolicy already
+      # limits pods to envoy-external); not host-network processes.
+      whitelist: 10.42.0.0/16
     users:
       auto_assign_org_role: Admin # only Authelia group admins get through
     log:
