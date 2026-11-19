@@ -1,0 +1,66 @@
+---
+# Talos ships no /etc/selinux/config, so libselinux in the Longhorn CSI plugin
+# reports SELinux disabled and its util-linux mount silently drops the
+# `context=` mount option: every Longhorn volume mounts as unlabeled_t and
+# each pod write raises a (permissive) AVC. Give the plugin a minimal config;
+# Longhorn owns the DaemonSet, so it is added at pod admission.
+# Upstream: longhorn/longhorn#12318 (seLinuxMount). Remove when that lands.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: longhorn-csi-selinux-config
+data:
+  config: |
+    SELINUX=permissive
+    SELINUXTYPE=targeted
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: longhorn-csi-selinux-config
+spec:
+  failurePolicy: Ignore
+  reinvocationPolicy: Never
+  matchConstraints:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: longhorn-system
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+  matchConditions:
+    - name: longhorn-csi-plugin
+      expression: "object.metadata.?labels['app'].orValue('') == 'longhorn-csi-plugin'"
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: >-
+          Object{
+            spec: Object.spec{
+              volumes: [Object.spec.volumes{
+                name: "selinux-config",
+                configMap: Object.spec.volumes.configMap{
+                  name: "longhorn-csi-selinux-config",
+                  optional: true
+                }
+              }],
+              containers: [Object.spec.containers{
+                name: "longhorn-csi-plugin",
+                volumeMounts: [Object.spec.containers.volumeMounts{
+                  name: "selinux-config",
+                  mountPath: "/etc/selinux/config",
+                  subPath: "config",
+                  readOnly: true
+                }]
+              }]
+            }
+          }
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: longhorn-csi-selinux-config
+spec:
+  policyName: longhorn-csi-selinux-config

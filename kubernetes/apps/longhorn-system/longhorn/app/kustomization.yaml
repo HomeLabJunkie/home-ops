@@ -5,6 +5,7 @@ components:
   - ../../../../components/authelia-gate
 resources:
   - ./helmrepository.yaml
+  - ./csi-selinux-config.yaml
   - ./storageclass-nobackup.yaml
   - ./storageclass-staging.yaml
   - ./volumesnapshotclass.yaml
