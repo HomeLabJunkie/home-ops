@@ -9,6 +9,7 @@ resources:
   - ./storageclass-staging.yaml
   - ./volumesnapshotclass.yaml
   - ./networkpolicy-metrics.yaml
+  - ./networkpolicy-ui.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
   - ./securitypolicy.yaml
