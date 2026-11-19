@@ -5,6 +5,7 @@ resources:
   - ./externalsecret.yaml
   - ./ocirepository.yaml
   - ./helmrelease.yaml
+  - ./networkpolicy.yaml
 configMapGenerator:
   - name: flux-metrics-configmap
     files:
