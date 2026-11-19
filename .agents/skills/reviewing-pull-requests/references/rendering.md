@@ -1,5 +1,28 @@
 # Rendering a HelmRelease with flate
 
+## Where to render
+
+Never check out a pull request's head in the operator's checkout. The PR
+controls `.mise/config.toml`, and mise trusts a config by its path, so a
+changed `[tools]`, `[env]` template or `[hooks]` entry would run with the
+local kubeconfig, talosconfig and Bitwarden token in reach. Take `flate`
+from main's toolchain and render the head in a throwaway worktree, which
+has none of the git-ignored credential files:
+
+```
+FLATE=$(mise which flate)                     # in the main checkout
+git fetch origin pull/<n>/head:pr-<n>
+git worktree add --detach "$(mktemp -d)/pr-<n>" pr-<n>
+cd <that worktree> && export MISE_PARANOID=1  # mise refuses the PR's config
+"$FLATE" diff hr <name> --base origin/main --path kubernetes/apps/<namespace> --no-progress -o diff
+```
+
+Do not run `mise trust`, `mise install` or any `mise run` task in that
+worktree. Remove it with `git worktree remove` when the review is done.
+The commands below are written as `flate`; use `"$FLATE"` in the worktree.
+
+## Rendering
+
 When a chart version or a HelmRelease's values change, render the
 HelmRelease with this repository's values, from the repository root, with
 the namespace's directory as the path.
