@@ -35,5 +35,5 @@ spec:
       serviceMonitor:
         enabled: true
     persistence:
-      defaultClass: true
-      defaultClassReplicaCount: 3
+      # The default class lives in storageclass-default.yaml (needs mountOptions)
+      createStorageClass: false
