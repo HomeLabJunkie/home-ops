@@ -99,7 +99,8 @@ spec:
         audit_throttle:
           type: throttle
           inputs: [split_audit.audit]
-          key_field: "{{ node }}"
+          # escaped: the chart runs customConfig through Helm tpl
+          key_field: '{{ "{{" }} node {{ "}}" }}'
           threshold: 1500
           window_secs: 60
       sinks:
