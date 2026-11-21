@@ -1,0 +1,29 @@
+---
+# For apps that replicate their own data across nodes (CloudNativePG keeps a
+# standby on another node): one Longhorn replica per volume, outside the
+# nightly Longhorn backups (the app backs itself up, e.g. Barman Cloud).
+# Separate from longhorn-staging so tuning Kopiur's staged copies never changes
+# database volumes. Parameters are only read when a volume is created.
+# context=: Talos can't label CSI volumes, so the mount does (needs the CSI
+# plugin's SELinux config from csi-selinux-config.yaml). Mount options are
+# immutable, so Flux replaces the class when they change (force); existing
+# volumes are not affected.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: longhorn-app-replicated
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: Enabled
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "1"
+  dataLocality: disabled
+  staleReplicaTimeout: "30"
+  fsType: ext4
+  dataEngine: v1
+  recurringJobSelector: '[{"name":"nobackup","isGroup":true}]'
+mountOptions:
+  - context=system_u:object_r:ephemeral_t:s0
