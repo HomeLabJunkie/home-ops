@@ -27,6 +27,8 @@ metadata:
 spec:
   dependsOn:
     - name: kopiur
+    - name: lan-services
+      namespace: network
   interval: 1h
   path: ./kubernetes/apps/kopiur-system/kopiur/repository
   prune: true

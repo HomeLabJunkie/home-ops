@@ -10,6 +10,8 @@ spec:
       namespace: cnpg-system
     - name: longhorn
       namespace: longhorn-system
+    - name: lan-services
+      namespace: network
   healthChecks:
     - apiVersion: postgresql.cnpg.io/v1
       kind: Cluster
