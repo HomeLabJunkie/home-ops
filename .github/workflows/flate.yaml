@@ -30,6 +30,7 @@ jobs:
             kubernetes/apps/**
             kubernetes/components/**
             .github/flate/**
+            .github/scripts/check-kopiur-callers.py
 
   flate:
     if: ${{ needs.filter.outputs.any-changed == 'true' }}
@@ -54,6 +55,15 @@ jobs:
         # when a Kustomization changes but the HelmRelease it health-checks
         # does not ("still Pending: waiting for declaration", flate 0.7.3).
         run: env -u FLATE_BASE flate test all -p ./kubernetes/apps --supply .github/flate/supply.yaml
+
+      - name: Check Kopiur backup callers
+        # Apps that include components/kopiur/backup: APP, dependencies, the
+        # PVC the workload mounts (errors) and the user it runs as (warning).
+        shell: bash
+        run: |
+          env -u FLATE_BASE flate build all -p ./kubernetes/apps --supply .github/flate/supply.yaml \
+            | yq -o=json -I=0 '.' \
+            | python3 .github/scripts/check-kopiur-callers.py
 
   success:
     if: ${{ !cancelled() }}
