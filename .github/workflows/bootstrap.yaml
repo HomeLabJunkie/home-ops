@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Bootstrap"
+
+# bootstrap/helmfile reads charts, values and manifests from kubernetes/apps
+# by path; renaming one of those files breaks a cluster rebuild, which nothing
+# else checks.
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - bootstrap/**
+      - kubernetes/apps/**
+      - .github/scripts/check-bootstrap.sh
+      - .github/workflows/bootstrap.yaml
+      - .mise/config.toml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  bootstrap:
+    name: Bootstrap
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
+        with:
+          install_args: helmfile helm
+
+      - name: Render bootstrap and check its files
+        run: .github/scripts/check-bootstrap.sh
