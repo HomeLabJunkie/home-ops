@@ -39,6 +39,22 @@
       minimumReleaseAge: "3 days",
     },
     {
+      // After the groups above so it wins for both: the tunnel image
+      // (docker.io/cloudflare/cloudflared) and the CLI pinned in mise
+      // ("cloudflared"). One PR for both, opened on release, merged
+      // by Renovate once the required checks pass. platformAutomerge off:
+      // GitHub auto-merge is disabled for this repo.
+      description: "cloudflared: no release delay, any day, automerge",
+      matchPackageNames: ["/(^|/)cloudflared$/"],
+      groupName: "cloudflared",
+      groupSlug: "cloudflared",
+      minimumReleaseAge: "0 days",
+      schedule: ["at any time"],
+      automerge: true,
+      automergeType: "pr",
+      platformAutomerge: false,
+    },
+    {
       description: "Flux Operator Group",
       groupName: "flux-operator",
       matchDatasources: ["docker"],
