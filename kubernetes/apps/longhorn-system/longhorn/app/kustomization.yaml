@@ -14,4 +14,3 @@ resources:
   - ./networkpolicy-ui.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
-  - ./securitypolicy.yaml

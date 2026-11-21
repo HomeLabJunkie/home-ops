@@ -27,6 +27,12 @@ spec:
       namespace: longhorn-system
   interval: 1h
   path: ./kubernetes/apps/observability/grafana-operator/instance
+  postBuild:
+    substitute:
+      # Every request to grafana.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor). The app's own Authorization
+      # header is not sent to Authelia.
+      AUTHELIA_ROUTE: grafana
   prune: true
   sourceRef:
     kind: GitRepository

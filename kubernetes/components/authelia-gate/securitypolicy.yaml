@@ -1,23 +1,24 @@
 ---
-# Requests to vaultwarden.jeffriffle.com/admin are checked by Authelia first
-# (Authelia rule: group admins, two_factor), then Vaultwarden asks for its
-# admin token. The vault itself (route "vaultwarden") has no Authelia.
+# Every request to the route is checked by Authelia first (the Authelia rule
+# for the hostname decides who may pass). The app's own Authorization header
+# is not sent to Authelia; the Remote-* headers Authelia returns are passed on.
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
-  name: vaultwarden-admin-authelia
+  name: ${AUTHELIA_ROUTE}-authelia
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      name: vaultwarden-admin
+      name: ${AUTHELIA_ROUTE}
   extAuth:
     failOpen: false
     headersToExtAuth: [accept, cookie, proxy-authorization, x-forwarded-proto]
     http:
       backendRefs:
         - name: authelia
+          namespace: network
           port: 9091
       path: /api/authz/ext-authz/
       headersToBackend: [remote-user, remote-groups, remote-name, remote-email]

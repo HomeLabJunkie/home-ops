@@ -7,7 +7,6 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
-  - ./securitypolicy.yaml
 # Homepage's config, except services.yaml and settings.yaml, which come from
 # the private repo (ConfigMap homepage-private). Reloader restarts the pod when
 # either ConfigMap changes.

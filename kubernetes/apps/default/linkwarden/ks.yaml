@@ -51,6 +51,11 @@ spec:
   path: ./kubernetes/apps/default/linkwarden/app
   postBuild:
     substitute:
+      # Every request to linkwarden.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor), then Linkwarden asks for its own
+      # login.
+      # app-template names routes <release>-<id> once there are two.
+      AUTHELIA_ROUTE: linkwarden-app
       APP: linkwarden
   prune: true
   sourceRef:

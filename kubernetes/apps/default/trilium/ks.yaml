@@ -16,6 +16,10 @@ spec:
   path: ./kubernetes/apps/default/trilium/app
   postBuild:
     substitute:
+      # Every request to trilium.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor), then Trilium asks for its own
+      # password. Sync between Trilium instances uses the LAN service instead.
+      AUTHELIA_ROUTE: trilium
       APP: trilium
   prune: true
   sourceRef:
