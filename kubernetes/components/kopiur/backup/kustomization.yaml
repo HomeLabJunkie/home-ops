@@ -1,4 +1,31 @@
 ---
+# Hourly Kopia backups of an app's volume to Garage, and a restore of the
+# latest backup whenever the volume is created (a new cluster comes back with
+# its data). Include it in the app's Flux Kustomization:
+#
+#   components:
+#     - ../../../../components/kopiur/backup
+#   dependsOn:                      # Flux components can't add these
+#     - name: kopiur-repository
+#       namespace: kopiur-system
+#     - name: longhorn
+#       namespace: longhorn-system
+#   postBuild:
+#     substitute:
+#       APP: myapp                  # names everything, including the PVC
+#       KOPIUR_CAPACITY: 1Gi        # optional, default 5Gi (PVC and mover cache)
+#
+# Optional, rarely needed: KOPIUR_ACCESSMODES (ReadWriteOnce),
+# KOPIUR_STORAGECLASS (longhorn), KOPIUR_STAGINGCLASS (longhorn-staging),
+# KOPIUR_SNAPSHOTCLASS (longhorn-snapshot), KOPIUR_PUID / KOPIUR_PGID (1000).
+#
+# The app must:
+#   - have a HelmRelease named ${APP} whose workload mounts the PVC ${APP}
+#     (app-template: persistence.<name>.existingClaim: "{{ .Release.Name }}")
+#   - write files the backup mover can read: it runs as KOPIUR_PUID/PGID, so
+#     run the app as that user (securityContext runAsUser/runAsGroup/fsGroup)
+#
+# .github/scripts/check-kopiur-callers.py checks this in CI (the Flate job).
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
