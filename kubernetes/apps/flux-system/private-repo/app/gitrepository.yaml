@@ -1,8 +1,9 @@
 ---
 # A second, private Git source. This public repository holds no details of the
 # home network; the few files that do (Homepage's list of non-cluster services
-# with LAN addresses) come from HomeLabJunkie/k3s-homelab-private. Only the
-# folder named below is fetched.
+# with LAN addresses, and the in-cluster names for Authelia and Garage on
+# unraid) come from HomeLabJunkie/k3s-homelab-private. Only the folders named
+# below are fetched.
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.toolkit.fluxcd.io/gitrepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
@@ -18,3 +19,4 @@ spec:
   ignore: |
     /*
     !/homepage/kubernetes/
+    !/lan-services/kubernetes/

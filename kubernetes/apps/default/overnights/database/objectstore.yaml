@@ -10,7 +10,7 @@ spec:
   retentionPolicy: 14d
   configuration:
     destinationPath: s3://cnpg/overnights
-    endpointURL: http://192.168.1.9:3900
+    endpointURL: http://garage.network.svc.cluster.local:3900
     s3Credentials:
       accessKeyId:
         name: overnights-postgres-s3

@@ -1,0 +1,55 @@
+---
+# Services outside the cluster, each given one in-cluster name in this
+# namespace (authelia, garage): a Service without a selector plus an
+# EndpointSlice with its LAN address. The addresses don't belong in this public
+# repo, so the manifests come from the private repo (see
+# flux-system/private-repo), applied with an identity that can manage Services
+# and EndpointSlices here and nothing else.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lan-services
+spec:
+  dependsOn:
+    - name: private-repo
+      namespace: flux-system
+  interval: 1h
+  path: ./lan-services/kubernetes
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: home-ops-private
+    namespace: flux-system
+  targetNamespace: network
+  serviceAccountName: lan-services-reconciler
+  wait: true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lan-services-reconciler
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lan-services-reconciler
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lan-services-reconciler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: lan-services-reconciler
+subjects:
+  - kind: ServiceAccount
+    name: lan-services-reconciler

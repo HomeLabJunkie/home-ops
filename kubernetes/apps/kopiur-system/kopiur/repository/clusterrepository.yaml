@@ -1,6 +1,7 @@
 ---
 # The backup repository every app writes to: a Kopia repository in the
-# "kopiur" bucket of Garage (S3) on the Unraid server.
+# "kopiur" bucket of Garage (S3) on the Unraid server, by its in-cluster name
+# (network/lan-services; the LAN address lives in the private repo).
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/clusterrepository_v1alpha1.json
 apiVersion: kopiur.home-operations.com/v1alpha1
 kind: ClusterRepository
@@ -16,7 +17,7 @@ spec:
           name: kopiur-repository-secret
           namespace: kopiur-system
       bucket: kopiur
-      endpoint: 192.168.1.9:3900
+      endpoint: garage.network.svc.cluster.local:3900
       region: garage
       tls:
         disableTls: true
