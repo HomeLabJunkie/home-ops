@@ -15,7 +15,7 @@ spec:
     podAntiAffinityType: required
   storage:
     size: 5Gi
-    storageClass: longhorn-staging
+    storageClass: longhorn-app-replicated
   resources:
     requests:
       cpu: 50m

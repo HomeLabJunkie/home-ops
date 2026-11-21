@@ -1,5 +1,6 @@
 ---
-# For Kopiur's temporary backup copies: every hour it restores a CSI snapshot
+# Only for Kopiur's temporary backup copies (databases use
+# longhorn-app-replicated): every hour it restores a CSI snapshot
 # of each app volume into a staged volume, backs that up and deletes it. One
 # replica (it lives minutes and the source keeps three), outside the nightly
 # Longhorn backups. Data locality stays off: with best-effort, Longhorn starts

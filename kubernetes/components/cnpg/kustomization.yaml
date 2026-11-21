@@ -10,7 +10,8 @@
 #       APP: myapp
 #       CNPG_BACKUP_SCHEDULE: "0 15 3 * * *" # optional; default daily 03:00
 #
-# The app supplies the Cluster itself, named ${APP}-postgres, with the
+# The app supplies the Cluster itself, named ${APP}-postgres, on the
+# longhorn-app-replicated StorageClass, with the
 # barman-cloud plugin pointing at the ObjectStore ${APP}-s3
 # (parameters.barmanObjectName), and its Kustomization depends on barman-cloud
 # (cnpg-system), longhorn (longhorn-system) and lan-services (network).
