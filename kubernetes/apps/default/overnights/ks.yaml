@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: overnights-database
 spec:
+  components:
+    - ../../../../components/cnpg
   dependsOn:
     - name: barman-cloud
       namespace: cnpg-system
@@ -23,6 +25,10 @@ spec:
       current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
   interval: 1h
   path: ./kubernetes/apps/default/overnights/database
+  postBuild:
+    substitute:
+      APP: overnights
+      CNPG_BACKUP_SCHEDULE: "0 15 3 * * *" # daily 03:15 (seconds first)
   prune: true
   sourceRef:
     kind: GitRepository

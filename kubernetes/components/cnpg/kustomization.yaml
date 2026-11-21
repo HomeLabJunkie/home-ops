@@ -1,0 +1,24 @@
+---
+# Backups and metrics for an app's CloudNativePG Cluster: WAL archived
+# continuously and a daily base backup to s3://cnpg/${APP} on Garage (unraid),
+# plus a PodMonitor. Include it in the app's "-database" Flux Kustomization:
+#
+#   components:
+#     - ../../../../components/cnpg
+#   postBuild:
+#     substitute:
+#       APP: myapp
+#       CNPG_BACKUP_SCHEDULE: "0 15 3 * * *" # optional; default daily 03:00
+#
+# The app supplies the Cluster itself, named ${APP}-postgres, with the
+# barman-cloud plugin pointing at the ObjectStore ${APP}-s3
+# (parameters.barmanObjectName), and its Kustomization depends on barman-cloud
+# (cnpg-system), longhorn (longhorn-system) and lan-services (network).
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./externalsecret.yaml
+  - ./objectstore.yaml
+  - ./podmonitor.yaml
+  - ./scheduledbackup.yaml

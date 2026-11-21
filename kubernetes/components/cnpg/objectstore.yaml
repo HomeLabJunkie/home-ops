@@ -1,22 +1,22 @@
 ---
-# Backups to s3://cnpg/linkwarden on Garage (unraid). Garage wants region
+# Backups to s3://cnpg/${APP} on Garage (unraid). Garage wants region
 # "garage" and doesn't support the newer AWS checksum headers.
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/barmancloud.cnpg.io/objectstore_v1.json
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:
-  name: linkwarden-s3
+  name: ${APP}-s3
 spec:
   retentionPolicy: 14d
   configuration:
-    destinationPath: s3://cnpg/linkwarden
+    destinationPath: s3://cnpg/${APP}
     endpointURL: http://garage.network.svc.cluster.local:3900
     s3Credentials:
       accessKeyId:
-        name: linkwarden-postgres-s3
+        name: ${APP}-postgres-s3
         key: ACCESS_KEY_ID
       secretAccessKey:
-        name: linkwarden-postgres-s3
+        name: ${APP}-postgres-s3
         key: ACCESS_SECRET_KEY
     wal:
       compression: gzip
