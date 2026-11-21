@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: linkwarden-database
 spec:
+  components:
+    - ../../../../components/cnpg
   dependsOn:
     - name: barman-cloud
       namespace: cnpg-system
@@ -23,6 +25,9 @@ spec:
       current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
   interval: 1h
   path: ./kubernetes/apps/default/linkwarden/database
+  postBuild:
+    substitute:
+      APP: linkwarden
   prune: true
   sourceRef:
     kind: GitRepository
