@@ -16,6 +16,10 @@ spec:
   path: ./kubernetes/apps/default/vaultwarden/app
   postBuild:
     substitute:
+      # Requests to vaultwarden.jeffriffle.com/admin are checked by Authelia first
+      # (Authelia rule: group admins, two_factor), then Vaultwarden asks for its
+      # admin token. The vault itself (route "vaultwarden") has no Authelia.
+      AUTHELIA_ROUTE: vaultwarden-admin
       APP: vaultwarden
   prune: true
   sourceRef:

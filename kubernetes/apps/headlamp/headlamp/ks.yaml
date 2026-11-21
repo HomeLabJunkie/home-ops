@@ -6,6 +6,12 @@ metadata:
 spec:
   interval: 1h
   path: ./kubernetes/apps/headlamp/headlamp/app
+  postBuild:
+    substitute:
+      # Every request to headlamp.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor). The app's own Authorization
+      # header is not sent to Authelia.
+      AUTHELIA_ROUTE: headlamp
   prune: true
   sourceRef:
     kind: GitRepository

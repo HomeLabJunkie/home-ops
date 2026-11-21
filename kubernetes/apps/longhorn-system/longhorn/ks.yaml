@@ -6,6 +6,12 @@ metadata:
 spec:
   interval: 1h
   path: ./kubernetes/apps/longhorn-system/longhorn/app
+  postBuild:
+    substitute:
+      # Every request to longhorn.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor). The app's own Authorization
+      # header is not sent to Authelia.
+      AUTHELIA_ROUTE: longhorn
   prune: true
   sourceRef:
     kind: GitRepository

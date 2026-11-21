@@ -8,6 +8,12 @@ spec:
     - name: homepage-private
   interval: 1h
   path: ./kubernetes/apps/default/homepage/app
+  postBuild:
+    substitute:
+      # Every request to homepage.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor). The app's own Authorization
+      # header is not sent to Authelia.
+      AUTHELIA_ROUTE: homepage
   prune: true
   sourceRef:
     kind: GitRepository

@@ -10,7 +10,6 @@ resources:
   - ./grafanadashboard.yaml
   - ./servicemonitor.yaml
   - ./httproute.yaml
-  - ./securitypolicy.yaml
   - ./networkpolicy.yaml
 configMapGenerator:
   - name: grafana-dashboard-logs

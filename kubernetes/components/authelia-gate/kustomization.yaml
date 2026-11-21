@@ -1,8 +1,17 @@
 ---
-# Puts an app's HTTPRoute behind Authelia (https://auth.jeffriffle.com, running
-# on unraid). Include this component in an app's kustomization and add a
-# SecurityPolicy (see securitypolicy.yaml in headlamp/longhorn) for its route.
+# Puts one HTTPRoute of an app behind Authelia (https://auth.jeffriffle.com,
+# running on unraid). Include this component in the app's kustomization and
+# name the route in the Flux Kustomization:
+#
+#   postBuild:
+#     substitute:
+#       AUTHELIA_ROUTE: <HTTPRoute name, e.g. myapp or myapp-app>
+#
+# Authelia itself is the Service network/authelia (network/lan-services); the
+# ReferenceGrant there must list the app's namespace. The gate covers only the
+# route: an app that trusts the Remote-User header, or has no login of its
+# own, also needs a NetworkPolicy so only the external Envoy can reach it.
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 resources:
-  - ./service.yaml
+  - ./securitypolicy.yaml
