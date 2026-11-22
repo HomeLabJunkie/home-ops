@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: wallos
+spec:
+  components:
+    - ../../../../components/kopiur/backup
+  dependsOn:
+    - name: kopiur-repository
+      namespace: kopiur-system
+    - name: longhorn
+      namespace: longhorn-system
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: wallos
+      namespace: default
+  interval: 1h
+  path: ./kubernetes/apps/default/wallos/app
+  postBuild:
+    substitute:
+      # Every request to wallos.jeffriffle.com is checked by Authelia first
+      # (Authelia rule: group admins, two_factor), then Wallos asks for its own login.
+      AUTHELIA_ROUTE: wallos
+      APP: wallos
+      KOPIUR_CAPACITY: 1Gi
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: default
