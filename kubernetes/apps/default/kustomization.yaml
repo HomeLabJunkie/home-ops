@@ -16,4 +16,5 @@ resources:
   - ./overnights/ks.yaml
   - ./trilium/ks.yaml
   - ./vaultwarden/ks.yaml
+  - ./wallos/ks.yaml
   - ./website/ks.yaml

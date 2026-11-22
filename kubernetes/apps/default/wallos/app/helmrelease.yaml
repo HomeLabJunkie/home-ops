@@ -1,0 +1,87 @@
+---
+# Wallos: subscription tracker. Moved here from the unraid `edge` compose
+# project on 2026-11-22 (homelab TODO #95); wallos.riffle.net redirects here.
+# SQLite db and uploaded logos on the "wallos" PVC, backed up hourly by Kopiur.
+# The image runs as root: its startup script chowns the db to www-data (82)
+# and php-fpm/nginx drop privileges themselves, so no runAsNonRoot here.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: wallos
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: wallos
+  interval: 1h
+  values:
+    controllers:
+      wallos:
+        containers:
+          app:
+            image:
+              repository: docker.io/bellamy/wallos
+              tag: 5.11.3@sha256:84c3b218e144a1292b2be6ad2f0b9d620277e860d307c3cfa5aff3ee629aae17
+            env:
+              TZ: America/Chicago
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health.php
+                    port: &port 80
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health.php
+                    port: *port
+                  periodSeconds: 5
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Wallos
+          gethomepage.dev/group: Apps
+          gethomepage.dev/icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/wallos.png
+          gethomepage.dev/description: subscription tracker
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=wallos
+        hostnames:
+          - wallos.jeffriffle.com
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+    persistence:
+      data:
+        existingClaim: "{{ .Release.Name }}"
+        advancedMounts:
+          wallos:
+            app:
+              - path: /var/www/html/db
+                subPath: db
+              - path: /var/www/html/images/uploads/logos
+                subPath: logos
