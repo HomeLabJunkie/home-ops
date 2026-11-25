@@ -52,9 +52,18 @@ Six **HP ProDesk 405 G4 Desktop Mini** PCs in a small rack, behind one managed g
 | `talos-5` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
 | `talos-6` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
 
-Supporting machines outside the cluster: an Unraid server (S3 object storage, single sign-on,
-other self-hosted apps), a NAS (backup target), an OPNsense router (DNS, DHCP) and a Raspberry Pi
-KVM for console access, and another Raspberry Pi5 runs Kuma for uptime monitoring and alerting as well.
+Supporting machines outside the cluster:
+
+- **Unraid server**: S3 object storage (Garage), single sign-on (Authelia), media, photos and other
+  self-hosted apps. Its Docker Compose stacks also live in Git (a private repository) and are
+  deployed by [Komodo](https://komo.do): Renovate opens pull requests for new image versions, and
+  merging one redeploys the stack through a GitHub webhook. A [Traefik](https://traefik.io) instance
+  is the front door for those apps.
+- **NAS**: the off-server backup target.
+- **OPNsense router**: firewall, DNS and DHCP.
+- **Raspberry Pi KVM**: console access to the nodes.
+- **Raspberry Pi 5**: [Uptime Kuma](https://github.com/louislam/uptime-kuma) for uptime monitoring
+  and alerting, kept independent of the rest.
 
 ## Components
 
