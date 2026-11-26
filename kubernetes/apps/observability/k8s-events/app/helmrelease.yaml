@@ -6,7 +6,7 @@
 # that happen after it starts, so a restart doesn't resend old ones.
 # Query: _stream:{source="k8s-events"}; fields k8s.event.reason,
 # k8s.object.kind, k8s.object.name, k8s.namespace.name, severity_text
-# (Normal = info, Warning = warn).
+# (Normal or Warning).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
