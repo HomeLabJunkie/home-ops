@@ -822,7 +822,7 @@
           },
           "queryType": "instant",
           "editorMode": "code",
-          "expr": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind) k8s.event.reason:in($ev_reason) severity_text:in($ev_type) ~\"(?i)$search\"",
+          "expr": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind) k8s.event.reason:in($ev_reason) severity_text:in($ev_type) ~\"(?i)$search\" | format if (severity_text:Warning) \"warning\" as level | format if (severity_text:Normal) \"info\" as level | format if (k8s.namespace.name:\"\") \"<k8s.event.reason>  <k8s.object.kind> <k8s.object.name>: <_msg>\" as _msg | format if (k8s.namespace.name:*) \"<k8s.event.reason>  <k8s.object.kind> <k8s.namespace.name>/<k8s.object.name>: <_msg>\" as _msg | fields _time, _msg, level",
           "maxLines": 1000
         }
       ],
