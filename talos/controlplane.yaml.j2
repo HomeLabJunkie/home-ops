@@ -43,7 +43,7 @@ certExtraSANs:
   - k8s.skynet
 extraArgs:
   enable-aggregator-routing: "true"
-image: registry.k8s.io/kube-apiserver:v1.36.6
+image: registry.k8s.io/kube-apiserver:v1.36.7
 ---
 apiVersion: v1alpha1
 kind: KubeAuditPolicyConfig
@@ -78,7 +78,7 @@ apiVersion: v1alpha1
 kind: KubeControllerManagerConfig
 extraArgs:
   bind-address: 0.0.0.0
-image: registry.k8s.io/kube-controller-manager:v1.36.6
+image: registry.k8s.io/kube-controller-manager:v1.36.7
 ---
 # CoreDNS is installed by Helm (bootstrap) and then managed by Flux
 apiVersion: v1alpha1
@@ -102,7 +102,7 @@ config:
 apiVersion: v1alpha1
 kind: KubeProxyConfig
 enabled: false
-image: registry.k8s.io/kube-proxy:v1.36.6
+image: registry.k8s.io/kube-proxy:v1.36.7
 ---
 apiVersion: v1alpha1
 kind: KubeSchedulerConfig
@@ -123,7 +123,7 @@ config:
                 whenUnsatisfiable: ScheduleAnyway
 extraArgs:
   bind-address: 0.0.0.0
-image: registry.k8s.io/kube-scheduler:v1.36.6
+image: registry.k8s.io/kube-scheduler:v1.36.7
 ---
 # Lets tuppr (in-cluster Talos and Kubernetes upgrades) talk to the Talos API
 apiVersion: v1alpha1
