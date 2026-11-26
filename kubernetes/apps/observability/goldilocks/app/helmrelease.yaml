@@ -1,0 +1,64 @@
+---
+# Goldilocks: CPU/memory request suggestions for every workload.
+# The controller creates a VerticalPodAutoscaler (updateMode Off) for each
+# Deployment/StatefulSet/DaemonSet/CronJob in every namespace; the VPA
+# recommender (installed here too, nothing else of VPA) watches real usage
+# from metrics-server and the dashboard shows the suggestions. Nothing is
+# ever changed automatically: no VPA updater or admission webhook.
+# Suggestions start rough and settle over about a week of history.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: goldilocks
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: goldilocks
+      version: 11.3.1
+      sourceRef:
+        kind: HelmRepository
+        name: fairwinds
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: -1
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    vpa:
+      enabled: true
+      recommender:
+        resources:
+          requests:
+            cpu: 20m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+      updater:
+        enabled: false
+      admissionController:
+        enabled: false
+    controller:
+      flags:
+        on-by-default: "true"
+        ignore-controller-kind: Job
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+    dashboard:
+      replicaCount: 1
+      flags:
+        on-by-default: "true"
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
