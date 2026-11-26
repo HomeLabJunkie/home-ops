@@ -1,7 +1,7 @@
 ---
 # VictoriaLogs holds every pod and Talos log and has no login, so only the
-# log shippers, Grafana and Prometheus may reach it. vector runs on the host
-# network, so it arrives as the host / remote-node entity (Cilium-only rule).
+# log shippers (incl. the k8s-events collector), Grafana and Prometheus may
+# reach it. vector runs on the host network, so it arrives as the host / remote-node entity (Cilium-only rule).
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -14,6 +14,8 @@ spec:
     - fromEndpoints:
         - matchLabels:
             app.kubernetes.io/name: victoria-logs-collector
+        - matchLabels:
+            app.kubernetes.io/name: k8s-events-collector
         - matchLabels:
             app: grafana
         - matchLabels:
