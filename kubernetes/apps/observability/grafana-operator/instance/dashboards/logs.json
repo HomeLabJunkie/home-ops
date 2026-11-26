@@ -1,7 +1,7 @@
 {
   "title": "Logs",
   "uid": "prodesk-logs",
-  "tags": ["logs", "victorialogs", "talos"],
+  "tags": ["logs", "victorialogs", "talos", "events"],
   "timezone": "browser",
   "refresh": "",
   "schemaVersion": 39,
@@ -171,6 +171,106 @@
           "type": "fieldValue",
           "field": "level",
           "query": "_stream:{source=\"talos\"} node:in($talos_node) service:in($talos_service)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "ev_namespace",
+        "label": "Event namespace",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "k8s.namespace.name",
+          "query": "_stream:{source=\"k8s-events\"}",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "ev_kind",
+        "label": "Event object kind",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "k8s.object.kind",
+          "query": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "ev_reason",
+        "label": "Event reason",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "k8s.event.reason",
+          "query": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind)",
+          "limit": 1000,
+          "refId": "A"
+        },
+        "multi": true,
+        "includeAll": true,
+        "allValue": "*",
+        "refresh": 2,
+        "sort": 1,
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        }
+      },
+      {
+        "name": "ev_type",
+        "label": "Event type",
+        "type": "query",
+        "datasource": {
+          "type": "victoriametrics-logs-datasource",
+          "uid": "$ds"
+        },
+        "query": {
+          "type": "fieldValue",
+          "field": "severity_text",
+          "query": "_stream:{source=\"k8s-events\"}",
           "limit": 1000,
           "refId": "A"
         },
@@ -487,6 +587,242 @@
           "queryType": "instant",
           "editorMode": "code",
           "expr": "_stream:{source=\"talos\"} node:in($talos_node) service:in($talos_service) level:in($talos_level) ~\"(?i)$search\"",
+          "maxLines": 1000
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showLabels": false,
+        "showCommonLabels": false
+      }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Kubernetes events (event namespace / kind / reason / type filters)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "panels": []
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Events by type",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 57
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind) k8s.event.reason:in($ev_reason) severity_text:in($ev_type) ~\"(?i)$search\" | stats by (severity_text) count() events",
+          "legendFormat": "{{severity_text}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Warning events by reason",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 57
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "statsRange",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind) k8s.event.reason:in($ev_reason) severity_text:in($ev_type) ~\"(?i)$search\" severity_text:Warning | stats by (k8s.event.reason) count() events",
+          "legendFormat": "{{k8s.event.reason}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Warning events in the time range (by reason, kind, namespace)",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "stats",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind) k8s.event.reason:in($ev_reason) severity_text:in($ev_type) ~\"(?i)$search\" severity_text:Warning | stats by (k8s.event.reason, k8s.object.kind, k8s.namespace.name) count() events"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "renameByName": {
+              "k8s.event.reason": "Reason",
+              "k8s.object.kind": "Kind",
+              "k8s.namespace.name": "Namespace",
+              "Value": "Events"
+            },
+            "indexByName": {
+              "k8s.event.reason": 0,
+              "k8s.object.kind": 1,
+              "k8s.namespace.name": 2,
+              "Value": 3
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Events",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    },
+    {
+      "id": 13,
+      "type": "logs",
+      "title": "Kubernetes events",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "$ds"
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "$ds"
+          },
+          "queryType": "instant",
+          "editorMode": "code",
+          "expr": "_stream:{source=\"k8s-events\"} k8s.namespace.name:in($ev_namespace) k8s.object.kind:in($ev_kind) k8s.event.reason:in($ev_reason) severity_text:in($ev_type) ~\"(?i)$search\"",
           "maxLines": 1000
         }
       ],
