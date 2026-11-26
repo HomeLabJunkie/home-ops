@@ -1,0 +1,82 @@
+---
+# Kubernetes events (OOMKilled, BackOff, FailedScheduling, Unhealthy, ...)
+# into victoria-logs, kept for its 30 days instead of the API server's ~1h.
+# One OpenTelemetry Collector (k8s distribution) watches events cluster-wide
+# with the k8s_events receiver and sends them over OTLP. It only sees events
+# that happen after it starts, so a restart doesn't resend old ones.
+# Query: _stream:{source="k8s-events"}; fields k8s.event.reason,
+# k8s.object.kind, k8s.object.name, k8s.namespace.name, severity_text
+# (Normal = info, Warning = warn).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: k8s-events-collector
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: k8s-events-collector
+  interval: 1h
+  values:
+    nameOverride: k8s-events-collector
+    fullnameOverride: k8s-events-collector
+    mode: deployment
+    replicaCount: 1
+    image:
+      repository: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s
+    command:
+      name: otelcol-k8s
+    presets:
+      kubernetesEvents:
+        enabled: true # also creates the ClusterRole to watch events
+        useK8sEventsReceiver: true
+    ports:
+      otlp: { enabled: false }
+      otlp-http: { enabled: false }
+      jaeger-compact: { enabled: false }
+      jaeger-thrift: { enabled: false }
+      jaeger-grpc: { enabled: false }
+      zipkin: { enabled: false }
+      metrics: { enabled: true }
+    podMonitor:
+      enabled: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 10001
+      runAsGroup: 10001
+      seccompProfile: { type: RuntimeDefault }
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities: { drop: ["ALL"] }
+    config:
+      receivers:
+        jaeger: null
+        zipkin: null
+        otlp: null
+        prometheus: null
+      processors:
+        resource/source:
+          attributes:
+            - key: source
+              value: k8s-events
+              action: insert
+      exporters:
+        debug: null
+        otlphttp/victorialogs:
+          logs_endpoint: http://victoria-logs.observability.svc.cluster.local:9428/insert/opentelemetry/v1/logs
+          headers:
+            VL-Stream-Fields: source
+      service:
+        pipelines:
+          logs:
+            receivers: [k8s_events]
+            processors: [memory_limiter, resource/source, batch]
+            exporters: [otlphttp/victorialogs]
+          metrics: null
+          traces: null
