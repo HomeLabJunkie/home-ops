@@ -47,14 +47,14 @@ Six **HP ProDesk 405 G4 Desktop Mini** PCs in a small rack, behind one managed g
   <img src="docs/images/mini-rack.png" alt="The mini rack: six HP ProDesk minis labeled talos-1 to talos-6, below the managed switch and patch panel" width="480">
 </p>
 
-| Node            | Role               | CPU                                                              | RAM        | OS disk               | Data disk                    |
-| --------------- | ------------------ | ---------------------------------------------------------------- | ---------- | --------------------- | ---------------------------- |
-| `talos&#8209;1` | Control&nbsp;plane | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
-| `talos&#8209;2` | Control&nbsp;plane | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
-| `talos&#8209;3` | Control&nbsp;plane | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
-| `talos&#8209;4` | Worker             | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
-| `talos&#8209;5` | Worker             | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
-| `talos&#8209;6` | Worker             | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
+| Node                       | Role               | CPU                                                              | RAM        | OS disk               | Data disk                    |
+| -------------------------- | ------------------ | ---------------------------------------------------------------- | ---------- | --------------------- | ---------------------------- |
+| <code>talos&#8209;1</code> | Control&nbsp;plane | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
+| <code>talos&#8209;2</code> | Control&nbsp;plane | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
+| <code>talos&#8209;3</code> | Control&nbsp;plane | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
+| <code>talos&#8209;4</code> | Worker             | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
+| <code>talos&#8209;5</code> | Worker             | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
+| <code>talos&#8209;6</code> | Worker             | AMD Ryzen 5 PRO 2400GE (4&nbsp;cores&nbsp;/&nbsp;8&nbsp;threads) | 32&nbsp;GB | 256&nbsp;GB&nbsp;NVMe | 1&nbsp;TB&nbsp;SATA&nbsp;SSD |
 
 Supporting machines outside the cluster:
 
