@@ -38,7 +38,7 @@ spec:
             image:
               # Debian-based (not slim): has the OpenSSH client and tzdata
               repository: docker.io/library/python
-              tag: 3.14-trixie@sha256:40bc16b613d4d54b03d301542b3123b855b167a66436bfdc91004e46d3a64043
+              tag: 3.15-trixie@sha256:b856c51ddffa0dfb3a25c7351abd0218857495922cf37352959b17ee03c0c938
             command: ["python3", "-u", "/etc/homelab-status/config/report.py"]
             env:
               HOME: /tmp
