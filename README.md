@@ -44,7 +44,7 @@ The layout and patterns follow [onedr0p/home-ops](https://github.com/onedr0p/hom
 Six **HP ProDesk 405 G4 Desktop Mini** PCs in a small rack, behind one managed gigabit switch.
 
 <p align="center">
-  <img src="docs/images/mini-rack.png" alt="The mini rack: six HP ProDesk minis labeled talos-1 to talos-6 with their IP addresses, below the managed switch and patch panel" width="480">
+  <img src="docs/images/mini-rack.png" alt="The mini rack: six HP ProDesk minis labeled talos-1 to talos-6, below the managed switch and patch panel" width="480">
 </p>
 
 | Node      | Role          | CPU                                          | RAM   | OS disk     | Data disk     |
