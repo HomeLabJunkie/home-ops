@@ -49,12 +49,12 @@ Six **HP ProDesk 405 G4 Desktop Mini** PCs in a small rack, behind one managed g
 
 | Node      | Role          | CPU                              | RAM   | OS disk     | Data disk     |
 | --------- | ------------- | -------------------------------- | ----- | ----------- | ------------- |
-| `talos-1` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
-| `talos-2` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
-| `talos-3` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
-| `talos-4` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
-| `talos-5` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
-| `talos-6` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos‑1` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos‑2` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos‑3` | Control plane | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos‑4` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos‑5` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
+| `talos‑6` | Worker        | AMD Ryzen 5 PRO 2400GE (4c / 8t) | 32 GB | 256 GB NVMe | 1 TB SATA SSD |
 
 Supporting machines outside the cluster:
 
