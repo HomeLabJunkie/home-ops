@@ -33,7 +33,7 @@ spec:
           git-clone: &gitsync
             image:
               repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.8.0
+              tag: v4.8.1
             args:
               - --repo=git@github.com:HomeLabJunkie/jeffriffle.com.git
               - --ref=deploy
