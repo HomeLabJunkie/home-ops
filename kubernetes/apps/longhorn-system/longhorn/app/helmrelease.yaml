@@ -25,6 +25,11 @@ spec:
     defaultSettings:
       defaultDataPath: /var/mnt/longhorn
       storageReservedPercentageForDefaultDisk: 10
+      # The default (block-if-contains-last-replica) never lets a node holding
+      # a one-replica volume drain, so tuppr's Talos upgrades stall there.
+      # Draining evicts the pod (CNPG switches the primary over first), the
+      # volume detaches, its replica stops, and the drain may proceed.
+      nodeDrainPolicy: allow-if-replica-is-stopped
     # Block-level volume backups go to the NAS over NFS. They are the second,
     # independent backup path next to Kopiur (file-level, to S3).
     defaultBackupStore:
