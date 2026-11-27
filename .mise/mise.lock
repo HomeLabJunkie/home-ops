@@ -476,6 +476,9 @@ aube = { path = "locks/npm-oxfmt/0.80.0", digest = "sha256:fa6a6ae0fbf529982a681
 backend = "npm:oxfmt"
 specifiers = ["0.80.0"]
 
+[tools."npm:oxfmt".provenance]
+repository = "github.com/oxc-project/oxc"
+
 [[tools.shellcheck]]
 version = "0.11.0"
 backend = "aqua:koalaman/shellcheck"
