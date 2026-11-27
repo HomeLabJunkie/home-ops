@@ -174,8 +174,13 @@ Tools are pinned in [`.mise/config.toml`](.mise/config.toml) and installed with
 
 ```sh
 mise trust && mise install
-mise tasks          # list the available tasks
+mise tasks --all    # list the available tasks
 ```
+
+Tasks live next to what they act on (`bootstrap/`, `kubernetes/`, `talos/`) and are named by
+directory, so run them from anywhere in the repository with the full name, for example
+`mise run //talos:apply-node talos-1`. Plain `mise tasks` lists only the current directory's tasks:
+empty at the root, or that directory's tasks inside one of those folders.
 
 ## Thanks
 
