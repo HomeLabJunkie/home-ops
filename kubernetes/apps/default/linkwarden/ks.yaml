@@ -62,6 +62,9 @@ spec:
       # app-template names routes <release>-<id> once there are two.
       AUTHELIA_ROUTE: linkwarden-app
       APP: linkwarden
+      # Doubled from the 5Gi default on 2026-11-27 (was 89% full); also sizes
+      # the kopiur mover cache
+      KOPIUR_CAPACITY: 10Gi
   prune: true
   sourceRef:
     kind: GitRepository
