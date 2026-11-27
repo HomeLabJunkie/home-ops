@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+components:
+  - ../../../../components/authelia-gate
+resources:
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ./networkpolicy.yaml
+  - ./ocirepository.yaml
+  - ./page.yaml
+  - ./rbac.yaml
+configMapGenerator:
+  - name: homelab-status-config
+    files:
+      - ./resources/report.py
+      - ./resources/probes.json
+      - ./resources/known_hosts
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled # report.py contains ${...}-like text
