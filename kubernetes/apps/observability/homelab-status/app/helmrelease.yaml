@@ -31,6 +31,8 @@ spec:
           failedJobsHistory: 2
         serviceAccount:
           name: homelab-status
+        pod:
+          automountServiceAccountToken: true # the chart defaults to false
         containers:
           app:
             image:
