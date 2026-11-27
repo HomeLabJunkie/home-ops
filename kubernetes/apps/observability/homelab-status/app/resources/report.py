@@ -114,8 +114,17 @@ class Kube:
         req.add_header("Accept", "application/json")
         if data is not None:
             req.add_header("Content-Type", "application/json")
-        with urllib.request.urlopen(req, context=self.ctx, timeout=30) as resp:
-            return json.load(resp)
+        # The API server's priority and fairness can answer 429 (or a brief
+        # 5xx); back off and retry instead of failing the section.
+        for attempt in range(5):
+            try:
+                with urllib.request.urlopen(req, context=self.ctx, timeout=30) as resp:
+                    return json.load(resp)
+            except urllib.error.HTTPError as exc:
+                if exc.code not in (429, 500, 502, 503, 504) or attempt == 4:
+                    raise
+                retry_after = exc.headers.get("Retry-After", "")
+                time.sleep(int(retry_after) if retry_after.isdigit() else 2 ** attempt)
 
     def get(self, path):
         return self.request("GET", path)
