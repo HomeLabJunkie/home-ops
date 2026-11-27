@@ -817,7 +817,7 @@ def render(sections, overall, history, duration):
         f"<title>{esc(LABEL[overall])} · Homelab status</title>",
         f"<style>{CSS}</style></head><body><main>",
         '<header class="top"><div><h1>Homelab status</h1>',
-        f'<div class="sub">Generated {esc(gen)} in {duration:.0f}s · refreshes daily at 6:00 AM</div></div>',
+        f'<div class="sub">Generated {esc(gen)} in {duration:.0f}s · refreshes at 6:00 AM and 6:00 PM</div></div>',
         f'<span class="pill s-{overall}">{esc(LABEL[overall])}</span></header>',
         '<div class="overview">',
     ]
@@ -905,7 +905,18 @@ def main():
             history = []
     today = NOW.astimezone(TZ).date().isoformat()
     counts = {"warn": sum(1 for s in sections for st, _ in s.notes if st == WARN), "crit": sum(1 for s in sections for st, _ in s.notes if st == CRIT)}
-    history = [h for h in history if h.get("date") != today] + [{"date": today, "overall": overall, **counts}]
+    # One entry per day holding that day's worst run, so a clean evening run
+    # doesn't hide a bad morning.
+    entry = {"date": today, "overall": overall, **counts}
+    for h in history:
+        if h.get("date") == today:
+            entry = {
+                "date": today,
+                "overall": worst(h.get("overall", OK), overall),
+                "warn": max(h.get("warn", 0), counts["warn"]),
+                "crit": max(h.get("crit", 0), counts["crit"]),
+            }
+    history = [h for h in history if h.get("date") != today] + [entry]
     history = history[-HISTORY_DAYS:]
 
     duration = time.monotonic() - start

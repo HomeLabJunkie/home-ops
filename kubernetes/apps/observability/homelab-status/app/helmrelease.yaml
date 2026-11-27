@@ -1,6 +1,6 @@
 ---
-# status.jeffriffle.com: a daily homelab health report. The "report" CronJob
-# (06:00 Central) reads the cluster (Kubernetes API, Prometheus,
+# status.jeffriffle.com: a homelab health report, twice a day. The "report"
+# CronJob (06:00 and 18:00 Central) reads the cluster (Kubernetes API, Prometheus,
 # Alertmanager), unraid and pi5 (restricted SSH key) and a set of HTTP probes,
 # and writes a static page into the ConfigMap homelab-status-page; nginx
 # serves that ConfigMap behind the Authelia gate. Run it now with:
@@ -20,7 +20,7 @@ spec:
       homelab-status:
         type: cronjob
         cronjob:
-          schedule: "0 6 * * *"
+          schedule: "0 6,18 * * *"
           timeZone: America/Chicago
           concurrencyPolicy: Forbid
           startingDeadlineSeconds: 3600
