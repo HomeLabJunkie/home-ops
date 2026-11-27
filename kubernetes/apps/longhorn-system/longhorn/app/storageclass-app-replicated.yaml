@@ -4,6 +4,10 @@
 # nightly Longhorn backups (the app backs itself up, e.g. Barman Cloud).
 # Separate from longhorn-staging so tuning Kopiur's staged copies never changes
 # database volumes. Parameters are only read when a volume is created.
+# dataLocality best-effort keeps the one replica on the node running the pod,
+# so each CNPG instance's data follows its own pod: with it disabled, both
+# instances of a cluster could land on one node. Existing volumes were set by
+# hand (kubectl patch volumes.longhorn.io ... spec.dataLocality).
 # context=: Talos can't label CSI volumes, so the mount does (needs the CSI
 # plugin's SELinux config from csi-selinux-config.yaml). Mount options are
 # immutable, so Flux replaces the class when they change (force); existing
@@ -20,7 +24,7 @@ reclaimPolicy: Delete
 volumeBindingMode: Immediate
 parameters:
   numberOfReplicas: "1"
-  dataLocality: disabled
+  dataLocality: best-effort
   staleReplicaTimeout: "30"
   fsType: ext4
   dataEngine: v1
