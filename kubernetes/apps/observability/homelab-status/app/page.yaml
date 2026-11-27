@@ -1,0 +1,14 @@
+---
+# Placeholder until the first report run. Flux creates it once and never
+# updates it (IfNotPresent): the report job owns its contents.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homelab-status-page
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+data:
+  index.html: |
+    <!doctype html><meta charset=utf-8><title>Homelab status</title>
+    <p style="font-family:system-ui;padding:2rem">No report yet: the first run is at 6:00 AM, or run
+    <code>kubectl -n observability create job --from=cronjob/homelab-status homelab-status-manual</code>.</p>

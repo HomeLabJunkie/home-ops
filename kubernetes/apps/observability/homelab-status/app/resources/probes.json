@@ -1,0 +1,49 @@
+[
+  { "name": "auth.jeffriffle.com", "url": "https://auth.jeffriffle.com/", "group": "unraid" },
+  { "name": "auth.homelabjunkie.com", "url": "https://auth.homelabjunkie.com/", "group": "unraid" },
+  { "name": "npm.homelabjunkie.com", "url": "https://npm.homelabjunkie.com/", "group": "unraid" },
+  {
+    "name": "unraid.homelabjunkie.com",
+    "url": "https://unraid.homelabjunkie.com/",
+    "group": "unraid"
+  },
+  { "name": "photos.riffle.net (Immich)", "url": "https://photos.riffle.net/", "group": "unraid" },
+  { "name": "komodo.riffle.net", "url": "https://komodo.riffle.net/", "group": "unraid" },
+  {
+    "name": "dvr.riffle.net",
+    "url": "https://dvr.riffle.net/",
+    "group": "unraid",
+    "critical": false
+  },
+  {
+    "name": "rackpeek.homelabjunkie.com",
+    "url": "https://rackpeek.homelabjunkie.com/",
+    "group": "unraid",
+    "critical": false
+  },
+  {
+    "name": "ha.homelabjunkie.com",
+    "url": "https://ha.homelabjunkie.com/",
+    "group": "Home Assistant"
+  },
+  { "name": "Home Assistant (LAN)", "url": "http://192.168.1.226/", "group": "Home Assistant" },
+  {
+    "name": "kuma.jeffriffle.com",
+    "url": "https://kuma.jeffriffle.com/",
+    "group": "pi5",
+    "critical": false
+  },
+  {
+    "name": "Uptime Kuma (LAN)",
+    "url": "http://192.168.0.209:3001/",
+    "group": "pi5",
+    "critical": false
+  },
+  {
+    "name": "TinyPilot (LAN)",
+    "url": "https://192.168.1.4/",
+    "group": "LAN",
+    "verify": false,
+    "critical": false
+  }
+]

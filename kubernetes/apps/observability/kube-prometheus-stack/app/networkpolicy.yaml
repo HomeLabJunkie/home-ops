@@ -1,7 +1,8 @@
 ---
 # Alertmanager has no login of its own (Authelia guards only its HTTPRoute),
 # so only its real clients may reach it: the external Envoy, Flux's
-# notification-controller, Grafana and Prometheus; plus its own peers.
+# notification-controller, Grafana, Prometheus and the homelab-status report
+# (reads active alerts); plus its own peers.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -31,6 +32,10 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: prometheus
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: homelab-status
+              app.kubernetes.io/controller: homelab-status
       ports:
         - port: 9093
           protocol: TCP
@@ -52,7 +57,7 @@ spec:
           protocol: UDP
 ---
 # Prometheus has no login; only Grafana, kromgo (public badges with fixed
-# queries) and Prometheus itself query it.
+# queries), the homelab-status report and Prometheus itself query it.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -73,6 +78,10 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: prometheus
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: homelab-status
+              app.kubernetes.io/controller: homelab-status
       ports:
         - port: 9090
           protocol: TCP

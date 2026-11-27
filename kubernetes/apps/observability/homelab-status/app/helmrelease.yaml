@@ -1,0 +1,134 @@
+---
+# status.jeffriffle.com: a daily homelab health report. The "report" CronJob
+# (06:00 Central) reads the cluster (Kubernetes API, Prometheus,
+# Alertmanager), unraid and pi5 (restricted SSH key) and a set of HTTP probes,
+# and writes a static page into the ConfigMap homelab-status-page; nginx
+# serves that ConfigMap behind the Authelia gate. Run it now with:
+#   kubectl -n observability create job --from=cronjob/homelab-status homelab-status-manual
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homelab-status
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: homelab-status
+  interval: 1h
+  values:
+    controllers:
+      homelab-status:
+        type: cronjob
+        cronjob:
+          schedule: "0 6 * * *"
+          timeZone: America/Chicago
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 3600
+          backoffLimit: 1
+          activeDeadlineSeconds: 900
+          ttlSecondsAfterFinished: 86400
+          successfulJobsHistory: 1
+          failedJobsHistory: 2
+        serviceAccount:
+          name: homelab-status
+        containers:
+          app:
+            image:
+              # Debian-based (not slim): has the OpenSSH client and tzdata
+              repository: docker.io/library/python
+              tag: 3.14-trixie@sha256:40bc16b613d4d54b03d301542b3123b855b167a66436bfdc91004e46d3a64043
+            command: ["python3", "-u", "/etc/homelab-status/config/report.py"]
+            env:
+              HOME: /tmp
+              PYTHONDONTWRITEBYTECODE: "1"
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 20m
+              limits:
+                memory: 256Mi
+      web:
+        strategy: RollingUpdate
+        pod:
+          automountServiceAccountToken: false
+        containers:
+          app:
+            image:
+              repository: ghcr.io/nginx/nginx-unprivileged
+              tag: 1.31.10-alpine@sha256:86628f2c9eaa5e84e3b98d25e26563c4a4f9b0ead9cf5656da4731d86e0621de
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &port 8080
+                  periodSeconds: 30
+              readiness: *probes
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 5m
+              limits:
+                memory: 32Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534 # nobody: has a passwd entry, which ssh needs
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: web
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        # Named for the Authelia gate (AUTHELIA_ROUTE in ks.yaml)
+        forceRename: homelab-status
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Homelab status
+          gethomepage.dev/group: Talos cluster
+          gethomepage.dev/icon: mdi-heart-pulse
+          gethomepage.dev/description: Daily health report
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=homelab-status,app.kubernetes.io/controller=web
+        hostnames:
+          - status.jeffriffle.com
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        type: configMap
+        name: homelab-status-config
+        advancedMounts:
+          homelab-status:
+            app: [{ path: /etc/homelab-status/config, readOnly: true }]
+      ssh:
+        type: secret
+        name: homelab-status-ssh
+        defaultMode: 0400
+        advancedMounts:
+          homelab-status:
+            app: [{ path: /etc/homelab-status/ssh, readOnly: true }]
+      page:
+        type: configMap
+        name: homelab-status-page # placeholder in page.yaml; the report replaces it
+        advancedMounts:
+          web:
+            app: [{ path: /usr/share/nginx/html, readOnly: true }]
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
