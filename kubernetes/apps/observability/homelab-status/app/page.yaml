@@ -10,5 +10,5 @@ metadata:
 data:
   index.html: |
     <!doctype html><meta charset=utf-8><title>Homelab status</title>
-    <p style="font-family:system-ui;padding:2rem">No report yet: the first run is at 6:00 AM, or run
+    <p style="font-family:system-ui;padding:2rem">No report yet: it runs at 6:00 AM and 6:00 PM, or run
     <code>kubectl -n observability create job --from=cronjob/homelab-status homelab-status-manual</code>.</p>
